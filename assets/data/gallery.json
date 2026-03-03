@@ -1,7 +1,92 @@
 {
-  "updatedAt": "2026-03-03T13:40:40.573Z",
-  "count": 0,
-  "albums": [],
-  "activityByDate": {},
-  "images": []
+  "updatedAt": "2026-03-03T14:01:22.669Z",
+  "count": 9,
+  "albums": [
+    {
+      "name": "Portfolio",
+      "slug": "portfolio",
+      "count": 3,
+      "cover": "assets/photos/Airbus-front.jpg"
+    },
+    {
+      "name": "Portrait",
+      "slug": "portrait",
+      "count": 1,
+      "cover": "assets/photos/portrait/DSC_0640.JPG"
+    },
+    {
+      "name": "Travel",
+      "slug": "travel",
+      "count": 5,
+      "cover": "assets/photos/travel/DSC_0012.JPG"
+    }
+  ],
+  "activityByDate": {
+    "2026-03-03": 9
+  },
+  "images": [
+    {
+      "src": "assets/photos/Airbus-front.jpg",
+      "title": "Airbus Front",
+      "album": "Portfolio",
+      "albumSlug": "portfolio",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/Bouche-qui-rit.jpg",
+      "title": "Bouche Qui Rit",
+      "album": "Portfolio",
+      "albumSlug": "portfolio",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/portrait/DSC_0640.JPG",
+      "title": "DSC 0640",
+      "album": "Portrait",
+      "albumSlug": "portrait",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/travel/DSC_0012.JPG",
+      "title": "DSC 0012",
+      "album": "Travel",
+      "albumSlug": "travel",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/travel/DSC_0165.JPG",
+      "title": "DSC 0165",
+      "album": "Travel",
+      "albumSlug": "travel",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/travel/DSC_0168.JPG",
+      "title": "DSC 0168",
+      "album": "Travel",
+      "albumSlug": "travel",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/travel/DSC_0352.JPG",
+      "title": "DSC 0352",
+      "album": "Travel",
+      "albumSlug": "travel",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/travel/DSC_0656.JPG",
+      "title": "DSC 0656",
+      "album": "Travel",
+      "albumSlug": "travel",
+      "date": "2026-03-03T14:59:10+01:00"
+    },
+    {
+      "src": "assets/photos/2.jpg",
+      "title": "2",
+      "album": "Portfolio",
+      "albumSlug": "portfolio",
+      "date": "2026-03-03T14:27:26+01:00"
+    }
+  ]
 }
