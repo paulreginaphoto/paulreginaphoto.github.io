@@ -1,39 +1,32 @@
-# Regina Photo — Luxe Plus
+# Regina Photo — GitHub Pages
 
-Site statique prêt pour **GitHub Pages** avec :
+Portfolio photo statique, clair et premium, prêt pour GitHub Pages.
 
-- design premium / éditorial
-- **albums automatiques**
-- **heatmap de publication**
-- lien Instagram vers **@paulregina.photo**
-- domaine custom déjà configuré via `CNAME` sur **regina.photo**
+## Ajouter des photos
 
-## Comment créer des albums
+Dépose tes fichiers ici :
 
-- Place les images à la racine de `assets/photos/` → elles vont dans l’album **Portfolio**
-- Place les images dans un sous-dossier → le sous-dossier devient un album
+- `assets/photos/`
+- ou dans des sous-dossiers, par exemple `assets/photos/portraits/`
 
-Exemples :
+Formats supportés :
 
-- `assets/photos/portrait/image-01.jpg`
-- `assets/photos/travel/italy-01.jpg`
-- `assets/photos/fine-art/studio-shot.webp`
+- `.jpg`
+- `.jpeg`
+- `.png`
+- `.webp`
+- `.avif`
+- `.gif`
 
-## Comment la heatmap fonctionne
+## Mise à jour automatique
 
-Le script lit la date du dernier commit Git affectant chaque image, puis génère une heatmap sur le site.
-Le workflow GitHub Actions clone l’historique complet (`fetch-depth: 0`) pour que ces dates soient fiables.
+À chaque `push` sur GitHub, le workflow :
 
-## Déploiement GitHub Pages
+1. scanne `assets/photos/`
+2. régénère `assets/data/gallery.json`
+3. commit le fichier si besoin
 
-1. Crée un repo sur le compte **paulreginaphoto**
-2. Upload le contenu de ce ZIP
-3. Active GitHub Pages depuis la branche `main`
-4. Garde le fichier `CNAME`
-5. Configure ton domaine `regina.photo` chez Namecheap vers GitHub Pages
+## GitHub Pages
 
-## Instagram
-
-Le site pointe vers :
-
-- `https://instagram.com/paulregina.photo`
+- Repo conseillé : `paulreginaphoto.github.io`
+- Domaine personnalisé : `regina.photo`
