@@ -1,1 +1,147 @@
-test
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Portfolio photo haut de gamme de Regina Photo. Galerie GitHub Pages auto-alimentée depuis un dossier d'images." />
+  <meta name="theme-color" content="#0b0d12" />
+  <title>Regina Photo</title>
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+  <div class="grain"></div>
+
+  <header class="site-header">
+    <a class="brand" href="#top" aria-label="Regina Photo">
+      <span class="brand-mark"></span>
+      <span class="brand-text">REGINA PHOTO</span>
+    </a>
+    <nav class="header-nav" aria-label="Navigation principale">
+      <a href="#gallery">Portfolio</a>
+      <a href="#process">Process</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero section">
+      <div class="hero-copy reveal">
+        <p class="eyebrow">Photographie d'auteur</p>
+        <h1>Un portfolio sobre, dense, et pensé pour laisser les images parler.</h1>
+        <p class="hero-text">
+          Ajoute simplement tes photos dans <code>assets/photos/</code>, pousse sur GitHub,
+          et la galerie se met à jour automatiquement sur <strong>regina.photo</strong>.
+        </p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#gallery">Voir le portfolio</a>
+          <a class="button button-secondary" href="#process">Comment ça marche</a>
+        </div>
+        <div class="hero-metrics" aria-label="Indicateurs du portfolio">
+          <div class="metric-card">
+            <span class="metric-value" id="photo-count">0</span>
+            <span class="metric-label">photos publiées</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-value" id="last-updated">—</span>
+            <span class="metric-label">dernière mise à jour</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero-visual reveal" id="hero-visual">
+        <div class="hero-frame empty" id="hero-frame">
+          <img id="hero-image" alt="Aperçu de la photo mise en avant" loading="eager" />
+          <div class="hero-overlay"></div>
+          <div class="hero-badge">Sélection en direct</div>
+          <div class="hero-empty-copy" id="hero-empty-copy">
+            <span class="hero-empty-title">Prêt à recevoir tes images</span>
+            <span class="hero-empty-text">Dépose tes fichiers dans <strong>assets/photos/</strong>.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section portfolio-shell" id="gallery">
+      <div class="section-head reveal">
+        <p class="eyebrow">Portfolio</p>
+        <div class="section-head-row">
+          <h2>Galerie auto-alimentée</h2>
+          <p>
+            Les images sont chargées depuis le manifeste généré automatiquement à partir du dossier
+            <code>assets/photos/</code>.
+          </p>
+        </div>
+      </div>
+
+      <div class="gallery-status reveal" id="gallery-status">
+        Chargement de la galerie…
+      </div>
+
+      <div class="gallery-grid reveal" id="gallery-grid" aria-live="polite"></div>
+    </section>
+
+    <section class="section process-shell" id="process">
+      <div class="section-head reveal">
+        <p class="eyebrow">Flux de travail</p>
+        <div class="section-head-row">
+          <h2>Simple et propre</h2>
+          <p>Aucune base de données, aucun CMS, pas de dépendance serveur.</p>
+        </div>
+      </div>
+
+      <div class="process-grid">
+        <article class="process-card reveal">
+          <span class="process-step">01</span>
+          <h3>Ajoute tes fichiers</h3>
+          <p>Place tes JPG, PNG, WebP, AVIF ou GIF dans <code>assets/photos/</code>.</p>
+        </article>
+        <article class="process-card reveal">
+          <span class="process-step">02</span>
+          <h3>Pousse sur GitHub</h3>
+          <p>Le workflow inclus régénère <code>assets/data/gallery.json</code> automatiquement.</p>
+        </article>
+        <article class="process-card reveal">
+          <span class="process-step">03</span>
+          <h3>Le site se met à jour</h3>
+          <p>La page recharge le manifeste et affiche immédiatement les nouvelles images.</p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer section" id="contact">
+    <div class="footer-grid reveal">
+      <div>
+        <p class="eyebrow">Contact</p>
+        <h2>regina.photo</h2>
+        <p class="footer-copy">
+          Déploiement prévu sur GitHub Pages pour <strong>@paulreginaphoto</strong>.
+        </p>
+      </div>
+      <div class="footer-meta">
+        <div>
+          <span class="footer-label">Domaine</span>
+          <span class="footer-value">regina.photo</span>
+        </div>
+        <div>
+          <span class="footer-label">Moteur</span>
+          <span class="footer-value">GitHub Pages + GitHub Actions</span>
+        </div>
+      </div>
+    </div>
+    <p class="footer-bottom">© <span id="current-year"></span> Regina Photo. Tous droits réservés.</p>
+  </footer>
+
+  <div class="lightbox" id="lightbox" aria-hidden="true" role="dialog" aria-label="Visualiseur d'image">
+    <button class="lightbox-close" id="lightbox-close" aria-label="Fermer">×</button>
+    <button class="lightbox-nav prev" id="lightbox-prev" aria-label="Image précédente">‹</button>
+    <figure class="lightbox-figure">
+      <img id="lightbox-image" alt="Image agrandie" />
+      <figcaption id="lightbox-caption"></figcaption>
+    </figure>
+    <button class="lightbox-nav next" id="lightbox-next" aria-label="Image suivante">›</button>
+  </div>
+
+  <script src="assets/js/main.js" defer></script>
+</body>
+</html>
