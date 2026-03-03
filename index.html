@@ -1,83 +1,160 @@
+
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Regina Photo</title>
-  <meta name="description" content="Portfolio photographique de Paul Regina." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paul Regina — Photography</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+    --bg:#ffffff;
+    --text:#111111;
+    --muted:#777777;
+    --accent:#000000;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
+header{
+    padding:60px 40px 40px;
+    text-align:center;
+}
+h1{
+    font-family:'Playfair Display',serif;
+    font-size:42px;
+    font-weight:600;
+    letter-spacing:1px;
+}
+.subtitle{
+    margin-top:12px;
+    font-size:15px;
+    color:var(--muted);
+}
+nav{
+    margin-top:20px;
+}
+nav a{
+    text-decoration:none;
+    color:var(--text);
+    font-size:14px;
+    margin:0 10px;
+    border-bottom:1px solid transparent;
+    transition:all .3s ease;
+}
+nav a:hover{
+    border-bottom:1px solid var(--text);
+}
+.gallery{
+    column-count:3;
+    column-gap:20px;
+    padding:0 40px 80px;
+}
+.gallery-item{
+    break-inside:avoid;
+    margin-bottom:20px;
+    cursor:pointer;
+}
+.gallery-item img{
+    width:100%;
+    display:block;
+    transition:opacity .3s ease;
+}
+.gallery-item img:hover{
+    opacity:.85;
+}
+@media(max-width:1000px){
+    .gallery{column-count:2;}
+}
+@media(max-width:600px){
+    .gallery{column-count:1;padding:0 20px 60px;}
+}
+.lightbox{
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(255,255,255,.97);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:999;
+    opacity:0;
+    visibility:hidden;
+    transition:all .3s ease;
+}
+.lightbox.active{
+    opacity:1;
+    visibility:visible;
+}
+.lightbox img{
+    max-width:90%;
+    max-height:90%;
+}
+.close{
+    position:absolute;
+    top:30px;
+    right:40px;
+    font-size:28px;
+    cursor:pointer;
+}
+footer{
+    text-align:center;
+    padding:40px 20px 60px;
+    font-size:13px;
+    color:var(--muted);
+}
+</style>
 </head>
 <body>
-  <div class="page-shell">
-    <header class="site-header">
-      <a class="brand" href="#top">Regina Photo</a>
-      <nav class="site-nav" aria-label="Navigation principale">
-        <a href="#portfolio">Portfolio</a>
-        <a href="https://instagram.com/paulregina.photo" target="_blank" rel="noreferrer">Instagram</a>
-      </nav>
-    </header>
 
-    <main id="top">
-      <section class="hero">
-        <p class="eyebrow">Paul Regina</p>
-        <h1>Portfolio photo simple, net, et premium.</h1>
-        <p class="hero-copy">
-          Un site épuré pour mettre les images en avant. Ajoute tes photos dans <code>assets/photos/</code>, pousse sur GitHub,
-          et la galerie se met à jour automatiquement.
-        </p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="#portfolio">Voir le portfolio</a>
-          <a class="button button-secondary" href="https://instagram.com/paulregina.photo" target="_blank" rel="noreferrer">@paulregina.photo</a>
-        </div>
-      </section>
+<header>
+    <h1>Paul Regina</h1>
+    <div class="subtitle">Photography — Lausanne, Switzerland</div>
+    <nav>
+        <a href="https://www.instagram.com/paulreginaphoto" target="_blank">Instagram</a>
+    </nav>
+</header>
 
-      <section class="intro-strip" aria-label="Présentation rapide">
-        <div>
-          <span class="metric-label">Style</span>
-          <strong>Clair & éditorial</strong>
-        </div>
-        <div>
-          <span class="metric-label">Mise à jour</span>
-          <strong>Automatique</strong>
-        </div>
-        <div>
-          <span class="metric-label">Domaine</span>
-          <strong>regina.photo</strong>
-        </div>
-      </section>
+<section class="gallery" id="gallery"></section>
 
-      <section id="portfolio" class="portfolio-section">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Portfolio</p>
-            <h2>Galerie</h2>
-          </div>
-          <div id="filterBar" class="filter-bar" hidden></div>
-        </div>
+<div class="lightbox" id="lightbox">
+    <div class="close" onclick="closeLightbox()">×</div>
+    <img id="lightbox-img" src="">
+</div>
 
-        <div id="status" class="status-card">Chargement des images…</div>
-        <div id="gallery" class="gallery" aria-live="polite"></div>
-      </section>
-    </main>
+<footer>
+    © Paul Regina — Lausanne, Switzerland
+</footer>
 
-    <footer class="site-footer">
-      <p>© <span id="year"></span> Paul Regina</p>
-      <a href="https://instagram.com/paulregina.photo" target="_blank" rel="noreferrer">Instagram</a>
-    </footer>
-  </div>
+<script>
+fetch('assets/data/gallery.json')
+.then(response => response.json())
+.then(data => {
+    const gallery = document.getElementById('gallery');
+    data.images.forEach(src => {
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
+        const img = document.createElement('img');
+        img.src = src;
+        img.onclick = () => openLightbox(src);
+        div.appendChild(img);
+        gallery.appendChild(div);
+    });
+});
 
-  <dialog id="lightbox" class="lightbox">
-    <button class="lightbox-close" id="lightboxClose" aria-label="Fermer">×</button>
-    <img id="lightboxImage" alt="Aperçu photo" />
-    <div class="lightbox-meta">
-      <strong id="lightboxTitle"></strong>
-      <span id="lightboxAlbum"></span>
-    </div>
-  </dialog>
+function openLightbox(src){
+    document.getElementById('lightbox-img').src = src;
+    document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox(){
+    document.getElementById('lightbox').classList.remove('active');
+}
+</script>
 
-  <script src="script.js"></script>
 </body>
 </html>

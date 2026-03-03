@@ -1,44 +1,32 @@
-name: Update gallery
+
+name: Update Gallery
 
 on:
   push:
-    branches:
-      - main
     paths:
       - 'assets/photos/**'
-      - 'scripts/build_gallery.py'
-      - '.github/workflows/update-gallery.yml'
-  workflow_dispatch:
-
-permissions:
-  contents: write
 
 jobs:
-  build-gallery:
+  build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Build gallery data
-        run: python scripts/build_gallery.py
-
-      - name: Commit updated gallery data
+      - uses: actions/checkout@v3
+      - name: Generate gallery.json
         run: |
-          if git diff --quiet -- assets/data/gallery.json; then
-            echo "No changes to commit"
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          echo '{ "images": [' > assets/data/gallery.json
+          first=1
+          for file in assets/photos/*; do
+            if [[ -f "$file" ]]; then
+              if [ $first -eq 0 ]; then echo ',' >> assets/data/gallery.json; fi
+              first=0
+              echo -n '"'$file'"' >> assets/data/gallery.json
+            fi
+          done
+          echo '] }' >> assets/data/gallery.json
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "actions@github.com"
           git add assets/data/gallery.json
-          git commit -m "Update gallery data"
-          git push
+          git commit -m "Update gallery"
+          git push || echo "No changes"
