@@ -2,10 +2,73 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta http-equiv="refresh" content="0; url=/" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Redirection…</title>
-  <script>window.location.replace('/');</script>
+  <meta name="robots" content="noindex" />
+  <title>Page introuvable — Regina Photo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg:#09090b;
+      --text:#f6f4ef;
+      --muted:#b7b0a5;
+      --gold:#cfb27a;
+      --line:rgba(255,255,255,0.08);
+    }
+    * { box-sizing:border-box; }
+    body {
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(207,178,122,0.08), transparent 24%),
+        linear-gradient(180deg, #08080a, #0b0b0f 50%, #09090b);
+      color:var(--text);
+      font-family:"Inter", system-ui, sans-serif;
+    }
+    .card {
+      width:min(100%, 760px);
+      padding:32px;
+      border-radius:28px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,0.03);
+    }
+    p { color:var(--muted); }
+    h1 {
+      margin:0 0 10px;
+      font:600 clamp(2.5rem, 8vw, 4.5rem)/0.98 "Cormorant Garamond", Georgia, serif;
+    }
+    a {
+      display:inline-flex;
+      margin-top:12px;
+      color:#111;
+      text-decoration:none;
+      font-weight:700;
+      min-height:48px;
+      padding:0 18px;
+      align-items:center;
+      border-radius:999px;
+      background:linear-gradient(135deg, #b79259, #e1c99b 55%, #fff2d4);
+    }
+    .eyebrow {
+      margin:0 0 12px;
+      color:var(--gold);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-size:.76rem;
+      font-weight:700;
+    }
+  </style>
 </head>
-<body></body>
+<body>
+  <main class="card">
+    <p class="eyebrow">404</p>
+    <h1>Page introuvable.</h1>
+    <p>Le lien demandé n’existe pas ou a été déplacé. Retourne à l’accueil du portfolio.</p>
+    <a href="/">Retour au site</a>
+  </main>
+</body>
 </html>

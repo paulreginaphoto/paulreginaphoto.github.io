@@ -3,108 +3,156 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Portfolio photo haut de gamme de Regina Photo. Galerie GitHub Pages auto-alimentée depuis un dossier d'images." />
-  <meta name="theme-color" content="#0b0d12" />
+  <meta name="description" content="Portfolio photo premium pour GitHub Pages. Galerie auto-alimentée depuis un dossier d'images, avec rendu éditorial haut de gamme." />
+  <meta name="theme-color" content="#0b0b0d" />
   <title>Regina Photo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
   <div class="grain"></div>
+  <div class="halo halo-a"></div>
+  <div class="halo halo-b"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Regina Photo">
       <span class="brand-mark"></span>
-      <span class="brand-text">REGINA PHOTO</span>
+      <span class="brand-lockup">
+        <span class="brand-kicker">REGINA</span>
+        <span class="brand-name">PHOTO</span>
+      </span>
     </a>
+
     <nav class="header-nav" aria-label="Navigation principale">
       <a href="#gallery">Portfolio</a>
-      <a href="#process">Process</a>
-      <a href="#contact">Contact</a>
+      <a href="#process">Publication</a>
+      <a href="#contact">Domaine</a>
     </nav>
   </header>
 
   <main id="top">
     <section class="hero section">
       <div class="hero-copy reveal">
-        <p class="eyebrow">Photographie d'auteur</p>
-        <h1>Un portfolio sobre, dense, et pensé pour laisser les images parler.</h1>
+        <p class="eyebrow">Fine art portfolio</p>
+        <h1>Une version plus luxueuse, plus éditoriale, plus galerie.</h1>
         <p class="hero-text">
-          Ajoute simplement tes photos dans <code>assets/photos/</code>, pousse sur GitHub,
-          et la galerie se met à jour automatiquement sur <strong>regina.photo</strong>.
+          Ce thème est pensé pour donner une présence haut de gamme à tes images sur <strong>regina.photo</strong>.
+          Tu ajoutes tes fichiers dans <code>assets/photos/</code>, tu pushes sur GitHub,
+          et la galerie se met à jour automatiquement.
         </p>
+
         <div class="hero-actions">
-          <a class="button button-primary" href="#gallery">Voir le portfolio</a>
-          <a class="button button-secondary" href="#process">Comment ça marche</a>
+          <a class="button button-primary" href="#gallery">Ouvrir le portfolio</a>
+          <a class="button button-secondary" href="#process">Voir le flux GitHub</a>
         </div>
+
         <div class="hero-metrics" aria-label="Indicateurs du portfolio">
-          <div class="metric-card">
+          <div class="metric-card metric-primary">
+            <span class="metric-label">Photos publiées</span>
             <span class="metric-value" id="photo-count">0</span>
-            <span class="metric-label">photos publiées</span>
           </div>
           <div class="metric-card">
-            <span class="metric-value" id="last-updated">—</span>
-            <span class="metric-label">dernière mise à jour</span>
+            <span class="metric-label">Dernière mise à jour</span>
+            <span class="metric-value metric-date" id="last-updated">—</span>
           </div>
+        </div>
+
+        <div class="signature-band">
+          <span>Éditorial</span>
+          <span>Minimal</span>
+          <span>Intemporel</span>
         </div>
       </div>
 
-      <div class="hero-visual reveal" id="hero-visual">
+      <div class="hero-stage reveal">
         <div class="hero-frame empty" id="hero-frame">
-          <img id="hero-image" alt="Aperçu de la photo mise en avant" loading="eager" />
+          <img id="hero-image" alt="Image mise en avant" loading="eager" />
           <div class="hero-overlay"></div>
-          <div class="hero-badge">Sélection en direct</div>
-          <div class="hero-empty-copy" id="hero-empty-copy">
-            <span class="hero-empty-title">Prêt à recevoir tes images</span>
-            <span class="hero-empty-text">Dépose tes fichiers dans <strong>assets/photos/</strong>.</span>
+
+          <div class="hero-topline">
+            <span class="hero-chip">Sélection</span>
+            <span class="hero-counter" id="hero-counter">00 / 00</span>
           </div>
+
+          <div class="hero-caption" id="hero-caption">
+            <p class="hero-caption-kicker">Image vedette</p>
+            <h2 id="hero-title">Prêt à accueillir tes images</h2>
+            <p id="hero-description">Ajoute des fichiers dans <code>assets/photos/</code> pour alimenter automatiquement la vitrine.</p>
+          </div>
+
+          <div class="hero-strip" id="hero-strip" aria-label="Aperçus rapides"></div>
         </div>
       </div>
+    </section>
+
+    <section class="section luxe-strip reveal" aria-label="Arguments clés">
+      <article class="luxe-card">
+        <span class="luxe-index">01</span>
+        <h3>Présence premium</h3>
+        <p>Grand hero, typographie éditoriale, contrastes raffinés et transitions sobres.</p>
+      </article>
+      <article class="luxe-card">
+        <span class="luxe-index">02</span>
+        <h3>Auto-alimentation</h3>
+        <p>Tu déposes des images dans un dossier, le workflow GitHub régénère le manifeste.</p>
+      </article>
+      <article class="luxe-card">
+        <span class="luxe-index">03</span>
+        <h3>Prêt pour regina.photo</h3>
+        <p><code>CNAME</code> inclus, structure simple, rapide à déployer sur GitHub Pages.</p>
+      </article>
     </section>
 
     <section class="section portfolio-shell" id="gallery">
       <div class="section-head reveal">
         <p class="eyebrow">Portfolio</p>
         <div class="section-head-row">
-          <h2>Galerie auto-alimentée</h2>
+          <h2>Une galerie pensée comme une exposition.</h2>
           <p>
-            Les images sont chargées depuis le manifeste généré automatiquement à partir du dossier
-            <code>assets/photos/</code>.
+            Les images sont chargées depuis <code>assets/data/gallery.json</code>, lui-même généré à partir de
+            <code>assets/photos/</code>. Aucun CMS, aucun back-end, pas de maintenance inutile.
           </p>
         </div>
       </div>
 
-      <div class="gallery-status reveal" id="gallery-status">
-        Chargement de la galerie…
+      <div class="gallery-toolbar reveal">
+        <div class="gallery-status" id="gallery-status">Chargement de la galerie…</div>
+        <div class="gallery-note">Survole une image pour la mettre en avant, clique pour l’ouvrir en plein écran.</div>
       </div>
 
       <div class="gallery-grid reveal" id="gallery-grid" aria-live="polite"></div>
     </section>
 
     <section class="section process-shell" id="process">
-      <div class="section-head reveal">
-        <p class="eyebrow">Flux de travail</p>
-        <div class="section-head-row">
-          <h2>Simple et propre</h2>
-          <p>Aucune base de données, aucun CMS, pas de dépendance serveur.</p>
+      <div class="process-panel reveal">
+        <div class="process-copy">
+          <p class="eyebrow">Publication</p>
+          <h2>Un flux simple, propre, sans friction.</h2>
+          <p class="process-intro">
+            Le site reste statique, rapide et fiable. Tu gardes le contrôle total du dépôt, sans dépendre d’un thème lourd
+            ou d’un service externe pour publier tes images.
+          </p>
         </div>
-      </div>
 
-      <div class="process-grid">
-        <article class="process-card reveal">
-          <span class="process-step">01</span>
-          <h3>Ajoute tes fichiers</h3>
-          <p>Place tes JPG, PNG, WebP, AVIF ou GIF dans <code>assets/photos/</code>.</p>
-        </article>
-        <article class="process-card reveal">
-          <span class="process-step">02</span>
-          <h3>Pousse sur GitHub</h3>
-          <p>Le workflow inclus régénère <code>assets/data/gallery.json</code> automatiquement.</p>
-        </article>
-        <article class="process-card reveal">
-          <span class="process-step">03</span>
-          <h3>Le site se met à jour</h3>
-          <p>La page recharge le manifeste et affiche immédiatement les nouvelles images.</p>
-        </article>
+        <div class="process-grid">
+          <article class="process-card">
+            <span class="process-step">01</span>
+            <h3>Ajouter</h3>
+            <p>Place tes images dans <code>assets/photos/</code> avec les noms de fichiers de ton choix.</p>
+          </article>
+          <article class="process-card">
+            <span class="process-step">02</span>
+            <h3>Push GitHub</h3>
+            <p>Le workflow inclus reconstruit automatiquement le manifeste <code>gallery.json</code>.</p>
+          </article>
+          <article class="process-card">
+            <span class="process-step">03</span>
+            <h3>En ligne</h3>
+            <p>Le portfolio charge les nouvelles images au prochain déploiement GitHub Pages.</p>
+          </article>
+        </div>
       </div>
     </section>
   </main>
@@ -112,10 +160,10 @@
   <footer class="site-footer section" id="contact">
     <div class="footer-grid reveal">
       <div>
-        <p class="eyebrow">Contact</p>
+        <p class="eyebrow">Déploiement</p>
         <h2>regina.photo</h2>
         <p class="footer-copy">
-          Déploiement prévu sur GitHub Pages pour <strong>@paulreginaphoto</strong>.
+          Structure prévue pour GitHub Pages, dépôt associé à <strong>@paulreginaphoto</strong>, rendu premium et maintenance minimale.
         </p>
       </div>
       <div class="footer-meta">
@@ -126,6 +174,10 @@
         <div>
           <span class="footer-label">Moteur</span>
           <span class="footer-value">GitHub Pages + GitHub Actions</span>
+        </div>
+        <div>
+          <span class="footer-label">Mode</span>
+          <span class="footer-value">Statique, rapide, auto-alimenté</span>
         </div>
       </div>
     </div>

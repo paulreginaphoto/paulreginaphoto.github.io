@@ -4,7 +4,10 @@ const photoCountEl = document.getElementById('photo-count');
 const lastUpdatedEl = document.getElementById('last-updated');
 const heroImage = document.getElementById('hero-image');
 const heroFrame = document.getElementById('hero-frame');
-const heroEmptyCopy = document.getElementById('hero-empty-copy');
+const heroCounter = document.getElementById('hero-counter');
+const heroTitle = document.getElementById('hero-title');
+const heroDescription = document.getElementById('hero-description');
+const heroStrip = document.getElementById('hero-strip');
 const yearEl = document.getElementById('current-year');
 
 const lightbox = document.getElementById('lightbox');
@@ -16,11 +19,13 @@ const lightboxNext = document.getElementById('lightbox-next');
 
 let galleryImages = [];
 let currentIndex = 0;
+let heroTimer = null;
 
 function formatDate(value) {
   if (!value) return '—';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
+
   return new Intl.DateTimeFormat('fr-CH', {
     dateStyle: 'medium',
     timeStyle: 'short'
@@ -40,16 +45,39 @@ function titleFromFilename(path) {
     .join(' ') || 'Sans titre';
 }
 
-function setHeroImage(src, title) {
-  heroImage.src = src;
-  heroImage.alt = title;
+function descriptionFromImage(image) {
+  const position = String(image.index + 1).padStart(2, '0');
+  return `Image ${position} sur ${String(galleryImages.length).padStart(2, '0')} · clique pour l’ouvrir en plein écran.`;
+}
+
+function updateHeroStripActiveState(index) {
+  const buttons = heroStrip.querySelectorAll('.hero-thumb');
+  buttons.forEach((button, buttonIndex) => {
+    button.classList.toggle('is-active', buttonIndex === index);
+  });
+}
+
+function setHeroImage(index) {
+  const image = galleryImages[index];
+  if (!image) return;
+
+  currentIndex = index;
+  heroImage.src = image.src;
+  heroImage.alt = image.title;
+  heroTitle.textContent = image.title;
+  heroDescription.textContent = descriptionFromImage(image);
+  heroCounter.textContent = `${String(index + 1).padStart(2, '0')} / ${String(galleryImages.length).padStart(2, '0')}`;
   heroFrame.classList.add('has-image');
   heroFrame.classList.remove('empty');
-  heroEmptyCopy.hidden = true;
+  updateHeroStripActiveState(index);
 }
 
 function renderEmptyState() {
   galleryStatus.textContent = 'Aucune photo détectée pour le moment.';
+  heroCounter.textContent = '00 / 00';
+  heroTitle.textContent = 'Prêt à accueillir tes images';
+  heroDescription.innerHTML = 'Ajoute des fichiers dans <code>assets/photos/</code> pour alimenter automatiquement la vitrine.';
+  heroStrip.innerHTML = '';
   galleryGrid.innerHTML = `
     <div class="empty-gallery">
       <h3>Le portfolio est prêt.</h3>
@@ -65,6 +93,7 @@ function openLightbox(index) {
   currentIndex = index;
   const image = galleryImages[currentIndex];
   if (!image) return;
+
   lightboxImage.src = image.src;
   lightboxImage.alt = image.title;
   lightboxCaption.textContent = image.title;
@@ -82,7 +111,29 @@ function closeLightbox() {
 function stepLightbox(direction) {
   if (!galleryImages.length) return;
   currentIndex = (currentIndex + direction + galleryImages.length) % galleryImages.length;
+  setHeroImage(currentIndex);
   openLightbox(currentIndex);
+}
+
+function buildHeroStrip() {
+  heroStrip.innerHTML = '';
+
+  galleryImages.slice(0, 4).forEach((image, stripIndex) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'hero-thumb';
+    button.setAttribute('aria-label', `Afficher ${image.title} en vedette`);
+
+    const img = document.createElement('img');
+    img.src = image.src;
+    img.alt = image.title;
+    img.loading = 'lazy';
+    img.decoding = 'async';
+
+    button.appendChild(img);
+    button.addEventListener('click', () => setHeroImage(stripIndex));
+    heroStrip.appendChild(button);
+  });
 }
 
 function renderGallery(items) {
@@ -101,7 +152,8 @@ function renderGallery(items) {
 
   galleryStatus.textContent = `${galleryImages.length} photo${galleryImages.length > 1 ? 's' : ''} chargée${galleryImages.length > 1 ? 's' : ''}.`;
   galleryGrid.innerHTML = '';
-  setHeroImage(galleryImages[0].src, galleryImages[0].title);
+  buildHeroStrip();
+  setHeroImage(0);
 
   galleryImages.forEach((image, index) => {
     const card = document.createElement('button');
@@ -112,7 +164,7 @@ function renderGallery(items) {
     const img = document.createElement('img');
     img.src = image.src;
     img.alt = image.title;
-    img.loading = index < 5 ? 'eager' : 'lazy';
+    img.loading = index < 6 ? 'eager' : 'lazy';
     img.decoding = 'async';
 
     const meta = document.createElement('div');
@@ -123,9 +175,13 @@ function renderGallery(items) {
     `;
 
     card.append(img, meta);
+    card.addEventListener('mouseenter', () => setHeroImage(index));
+    card.addEventListener('focus', () => setHeroImage(index));
     card.addEventListener('click', () => openLightbox(index));
     galleryGrid.appendChild(card);
   });
+
+  startHeroAutoplay();
 }
 
 async function loadGallery() {
@@ -141,6 +197,7 @@ async function loadGallery() {
     photoCountEl.textContent = '0';
     lastUpdatedEl.textContent = '—';
     galleryStatus.textContent = 'Impossible de charger le manifeste de galerie.';
+    heroCounter.textContent = '00 / 00';
     galleryGrid.innerHTML = `
       <div class="empty-gallery">
         <h3>Le site fonctionne, mais la galerie n'est pas encore générée.</h3>
@@ -152,6 +209,21 @@ async function loadGallery() {
     `;
     console.error(error);
   }
+}
+
+function startHeroAutoplay() {
+  if (heroTimer) {
+    window.clearInterval(heroTimer);
+    heroTimer = null;
+  }
+
+  if (galleryImages.length < 2) return;
+
+  heroTimer = window.setInterval(() => {
+    if (lightbox.classList.contains('open')) return;
+    const nextIndex = (currentIndex + 1) % galleryImages.length;
+    setHeroImage(nextIndex);
+  }, 5000);
 }
 
 function setupLightbox() {
@@ -179,7 +251,7 @@ function setupReveal() {
       entry.target.classList.add('is-visible');
       observer.unobserve(entry.target);
     });
-  }, { threshold: 0.15 });
+  }, { threshold: 0.12 });
 
   elements.forEach((element) => observer.observe(element));
 }

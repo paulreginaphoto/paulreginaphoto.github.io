@@ -1,37 +1,36 @@
 # Regina Photo — GitHub Pages
 
-Site statique haut de gamme pour portfolio photo, prêt à publier sur GitHub Pages.
+Portfolio photo statique au rendu premium, prévu pour GitHub Pages avec domaine personnalisé `regina.photo`.
 
-## Utilisation
+## Fonctionnement
 
-1. Crée un dépôt GitHub (ou utilise ton dépôt de site GitHub Pages).
-2. Uploade tout le contenu de ce ZIP à la racine du dépôt.
-3. Active **GitHub Pages** depuis la branche `main` (ou `master`) et le dossier racine (`/`).
-4. Vérifie que le fichier `CNAME` contient bien `regina.photo`.
-5. Configure le DNS de `regina.photo` vers GitHub Pages.
+Le site ne lit pas directement le contenu d'un dossier côté navigateur. Pour contourner proprement cette limite de GitHub Pages, le dépôt inclut :
 
-## Ajouter des photos
+- un dossier `assets/photos/` dans lequel tu déposes tes images
+- un script `scripts/build-gallery.js` qui génère `assets/data/gallery.json`
+- un workflow GitHub Actions qui exécute ce script automatiquement à chaque push sur `main` ou `master`
 
-- Dépose tes images dans `assets/photos/`
-- Formats pris en charge : `.jpg`, `.jpeg`, `.png`, `.webp`, `.avif`, `.gif`
-- Pousse le dépôt sur GitHub
-- Le workflow `.github/workflows/update-gallery.yml` régénère automatiquement `assets/data/gallery.json`
-- La galerie s'affiche ensuite automatiquement sur le site
+Résultat : tu ajoutes des photos, tu pushes, et la galerie se met à jour.
 
-## Ordre d'affichage
+## Formats supportés
 
-Les images sont triées par nom de fichier. Si tu veux contrôler l'ordre, nomme tes photos ainsi :
+- `.jpg`
+- `.jpeg`
+- `.png`
+- `.webp`
+- `.avif`
+- `.gif`
 
-- `001-portrait.jpg`
-- `002-studio.jpg`
-- `003-nuit.jpg`
+## Déploiement
 
-## Domaine personnalisé
+1. Crée un dépôt GitHub, idéalement `paulreginaphoto.github.io` ou un dépôt dédié si tu utilises un domaine custom.
+2. Upload le contenu de ce ZIP à la racine du dépôt.
+3. Vérifie que GitHub Pages publie bien depuis la branche principale.
+4. Le fichier `CNAME` est déjà configuré pour `regina.photo`.
 
-Le fichier `CNAME` est déjà configuré pour :
+## Ajouter des images
 
-- `regina.photo`
-
-## Compte GitHub prévu
-
-- `paulreginaphoto`
+1. Dépose tes images dans `assets/photos/`
+2. Commit + push
+3. GitHub Actions régénère `assets/data/gallery.json`
+4. GitHub Pages affiche automatiquement les nouvelles images
