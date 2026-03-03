@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Portfolio photo premium pour GitHub Pages. Galerie auto-alimentée depuis un dossier d'images, avec rendu éditorial haut de gamme." />
-  <meta name="theme-color" content="#0b0b0d" />
+  <meta name="description" content="Portfolio photo premium pour GitHub Pages, avec albums, heatmap de publication et galerie auto-alimentée depuis un dossier d'images." />
+  <meta name="theme-color" content="#0a0a0d" />
   <title>Regina Photo</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,9 +12,8 @@
   <link rel="stylesheet" href="assets/css/styles.css" />
 </head>
 <body>
+  <div class="ambient"></div>
   <div class="grain"></div>
-  <div class="halo halo-a"></div>
-  <div class="halo halo-b"></div>
 
   <header class="site-header">
     <a class="brand" href="#top" aria-label="Regina Photo">
@@ -26,32 +25,37 @@
     </a>
 
     <nav class="header-nav" aria-label="Navigation principale">
+      <a href="#albums">Albums</a>
+      <a href="#timeline">Heatmap</a>
       <a href="#gallery">Portfolio</a>
-      <a href="#process">Publication</a>
-      <a href="#contact">Domaine</a>
+      <a href="https://instagram.com/paulreginaphoto" target="_blank" rel="noopener noreferrer">Instagram</a>
     </nav>
   </header>
 
   <main id="top">
-    <section class="hero section">
+    <section class="section hero">
       <div class="hero-copy reveal">
         <p class="eyebrow">Fine art portfolio</p>
-        <h1>Une version plus luxueuse, plus éditoriale, plus galerie.</h1>
+        <h1>Un portfolio plus luxueux, structuré par albums, avec rythme de publication visible.</h1>
         <p class="hero-text">
-          Ce thème est pensé pour donner une présence haut de gamme à tes images sur <strong>regina.photo</strong>.
-          Tu ajoutes tes fichiers dans <code>assets/photos/</code>, tu pushes sur GitHub,
-          et la galerie se met à jour automatiquement.
+          Ce thème est pensé pour <strong>regina.photo</strong> : tu ajoutes simplement tes images dans
+          <code>assets/photos/</code>, le workflow GitHub génère automatiquement la galerie,
+          les albums et la heatmap d’activité.
         </p>
 
         <div class="hero-actions">
           <a class="button button-primary" href="#gallery">Ouvrir le portfolio</a>
-          <a class="button button-secondary" href="#process">Voir le flux GitHub</a>
+          <a class="button button-secondary" href="https://instagram.com/paulregina.photo" target="_blank" rel="noopener noreferrer">Instagram</a>
         </div>
 
         <div class="hero-metrics" aria-label="Indicateurs du portfolio">
           <div class="metric-card metric-primary">
             <span class="metric-label">Photos publiées</span>
             <span class="metric-value" id="photo-count">0</span>
+          </div>
+          <div class="metric-card">
+            <span class="metric-label">Albums</span>
+            <span class="metric-value" id="album-count">0</span>
           </div>
           <div class="metric-card">
             <span class="metric-label">Dernière mise à jour</span>
@@ -61,8 +65,9 @@
 
         <div class="signature-band">
           <span>Éditorial</span>
-          <span>Minimal</span>
-          <span>Intemporel</span>
+          <span>Albums</span>
+          <span>Heatmap</span>
+          <span>Instagram</span>
         </div>
       </div>
 
@@ -72,14 +77,14 @@
           <div class="hero-overlay"></div>
 
           <div class="hero-topline">
-            <span class="hero-chip">Sélection</span>
+            <span class="hero-chip" id="hero-album">Sélection</span>
             <span class="hero-counter" id="hero-counter">00 / 00</span>
           </div>
 
           <div class="hero-caption" id="hero-caption">
             <p class="hero-caption-kicker">Image vedette</p>
             <h2 id="hero-title">Prêt à accueillir tes images</h2>
-            <p id="hero-description">Ajoute des fichiers dans <code>assets/photos/</code> pour alimenter automatiquement la vitrine.</p>
+            <p id="hero-description">Dépose tes photos dans <code>assets/photos/</code> pour alimenter automatiquement la vitrine.</p>
           </div>
 
           <div class="hero-strip" id="hero-strip" aria-label="Aperçus rapides"></div>
@@ -87,22 +92,83 @@
       </div>
     </section>
 
-    <section class="section luxe-strip reveal" aria-label="Arguments clés">
-      <article class="luxe-card">
-        <span class="luxe-index">01</span>
-        <h3>Présence premium</h3>
-        <p>Grand hero, typographie éditoriale, contrastes raffinés et transitions sobres.</p>
+    <section class="section feature-strip reveal" aria-label="Points forts">
+      <article class="feature-card">
+        <span class="feature-index">01</span>
+        <h3>Albums automatiques</h3>
+        <p>Chaque sous-dossier dans <code>assets/photos/</code> devient un album filtrable sur le site.</p>
       </article>
-      <article class="luxe-card">
-        <span class="luxe-index">02</span>
-        <h3>Auto-alimentation</h3>
-        <p>Tu déposes des images dans un dossier, le workflow GitHub régénère le manifeste.</p>
+      <article class="feature-card">
+        <span class="feature-index">02</span>
+        <h3>Heatmap de publication</h3>
+        <p>Le site visualise ton rythme de publication à partir des dates de commit de chaque image.</p>
       </article>
-      <article class="luxe-card">
-        <span class="luxe-index">03</span>
-        <h3>Prêt pour regina.photo</h3>
-        <p><code>CNAME</code> inclus, structure simple, rapide à déployer sur GitHub Pages.</p>
+      <article class="feature-card">
+        <span class="feature-index">03</span>
+        <h3>Lien Instagram intégré</h3>
+        <p>Navigation et footer connectés à <strong>@paulregina.photo</strong> pour capter l’audience sociale.</p>
       </article>
+    </section>
+
+    <section class="section albums-shell" id="albums">
+      <div class="section-head reveal">
+        <p class="eyebrow">Albums</p>
+        <div class="section-head-row">
+          <h2>Un classement propre, sans CMS.</h2>
+          <p>
+            Pour créer un album, mets simplement tes images dans un sous-dossier de <code>assets/photos/</code>
+            (ex. <code>assets/photos/portraits/</code>, <code>assets/photos/travel/</code>).
+          </p>
+        </div>
+      </div>
+
+      <div class="album-grid reveal" id="album-list" aria-live="polite"></div>
+    </section>
+
+    <section class="section timeline-shell" id="timeline">
+      <div class="section-head reveal">
+        <p class="eyebrow">Heatmap</p>
+        <div class="section-head-row">
+          <h2>Le rythme de publication, rendu visible.</h2>
+          <p>
+            Cette heatmap reprend l’activité des images sur les 26 dernières semaines.
+            Par défaut, elle suit l’ensemble du portfolio, puis se met à jour selon l’album sélectionné.
+          </p>
+        </div>
+      </div>
+
+      <div class="timeline-panel reveal">
+        <div class="timeline-stats">
+          <div class="timeline-stat">
+            <span class="timeline-label">Jours actifs</span>
+            <span class="timeline-value" id="heatmap-active-days">0</span>
+          </div>
+          <div class="timeline-stat">
+            <span class="timeline-label">Photos sur la période</span>
+            <span class="timeline-value" id="heatmap-total-uploads">0</span>
+          </div>
+          <div class="timeline-stat">
+            <span class="timeline-label">Pic journalier</span>
+            <span class="timeline-value" id="heatmap-peak-day">0</span>
+          </div>
+        </div>
+
+        <div class="heatmap-card">
+          <div class="heatmap-months" id="heatmap-months"></div>
+          <div class="heatmap-grid" id="heatmap-grid" aria-label="Heatmap des publications"></div>
+          <div class="heatmap-legend" aria-label="Légende heatmap">
+            <span>Moins</span>
+            <div class="legend-scale">
+              <span class="heat-square level-0"></span>
+              <span class="heat-square level-1"></span>
+              <span class="heat-square level-2"></span>
+              <span class="heat-square level-3"></span>
+              <span class="heat-square level-4"></span>
+            </div>
+            <span>Plus</span>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="section portfolio-shell" id="gallery">
@@ -111,49 +177,19 @@
         <div class="section-head-row">
           <h2>Une galerie pensée comme une exposition.</h2>
           <p>
-            Les images sont chargées depuis <code>assets/data/gallery.json</code>, lui-même généré à partir de
-            <code>assets/photos/</code>. Aucun CMS, aucun back-end, pas de maintenance inutile.
+            Les images sont chargées depuis <code>assets/data/gallery.json</code>, généré automatiquement à partir de
+            <code>assets/photos/</code>. Aucun CMS, aucun back-end, juste GitHub Pages.
           </p>
         </div>
       </div>
 
       <div class="gallery-toolbar reveal">
         <div class="gallery-status" id="gallery-status">Chargement de la galerie…</div>
-        <div class="gallery-note">Survole une image pour la mettre en avant, clique pour l’ouvrir en plein écran.</div>
+        <div class="gallery-note">Survole pour mettre en avant, clique pour ouvrir en plein écran.</div>
       </div>
 
+      <div class="filter-pills reveal" id="filter-pills"></div>
       <div class="gallery-grid reveal" id="gallery-grid" aria-live="polite"></div>
-    </section>
-
-    <section class="section process-shell" id="process">
-      <div class="process-panel reveal">
-        <div class="process-copy">
-          <p class="eyebrow">Publication</p>
-          <h2>Un flux simple, propre, sans friction.</h2>
-          <p class="process-intro">
-            Le site reste statique, rapide et fiable. Tu gardes le contrôle total du dépôt, sans dépendre d’un thème lourd
-            ou d’un service externe pour publier tes images.
-          </p>
-        </div>
-
-        <div class="process-grid">
-          <article class="process-card">
-            <span class="process-step">01</span>
-            <h3>Ajouter</h3>
-            <p>Place tes images dans <code>assets/photos/</code> avec les noms de fichiers de ton choix.</p>
-          </article>
-          <article class="process-card">
-            <span class="process-step">02</span>
-            <h3>Push GitHub</h3>
-            <p>Le workflow inclus reconstruit automatiquement le manifeste <code>gallery.json</code>.</p>
-          </article>
-          <article class="process-card">
-            <span class="process-step">03</span>
-            <h3>En ligne</h3>
-            <p>Le portfolio charge les nouvelles images au prochain déploiement GitHub Pages.</p>
-          </article>
-        </div>
-      </div>
     </section>
   </main>
 
@@ -163,21 +199,23 @@
         <p class="eyebrow">Déploiement</p>
         <h2>regina.photo</h2>
         <p class="footer-copy">
-          Structure prévue pour GitHub Pages, dépôt associé à <strong>@paulreginaphoto</strong>, rendu premium et maintenance minimale.
+          Structure prévue pour GitHub Pages, dépôt associé à <strong>@paulreginaphoto</strong>,
+          avec albums, heatmap et intégration Instagram.
         </p>
       </div>
+
       <div class="footer-meta">
         <div>
           <span class="footer-label">Domaine</span>
           <span class="footer-value">regina.photo</span>
         </div>
         <div>
-          <span class="footer-label">Moteur</span>
-          <span class="footer-value">GitHub Pages + GitHub Actions</span>
+          <span class="footer-label">Instagram</span>
+          <a class="footer-link" href="https://instagram.com/paulregina.photo" target="_blank" rel="noopener noreferrer">@paulregina.photo</a>
         </div>
         <div>
-          <span class="footer-label">Mode</span>
-          <span class="footer-value">Statique, rapide, auto-alimenté</span>
+          <span class="footer-label">Moteur</span>
+          <span class="footer-value">GitHub Pages + Actions</span>
         </div>
       </div>
     </div>

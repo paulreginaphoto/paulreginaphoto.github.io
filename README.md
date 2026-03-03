@@ -1,36 +1,39 @@
-# Regina Photo — GitHub Pages
+# Regina Photo — Luxe Plus
 
-Portfolio photo statique au rendu premium, prévu pour GitHub Pages avec domaine personnalisé `regina.photo`.
+Site statique prêt pour **GitHub Pages** avec :
 
-## Fonctionnement
+- design premium / éditorial
+- **albums automatiques**
+- **heatmap de publication**
+- lien Instagram vers **@paulregina.photo**
+- domaine custom déjà configuré via `CNAME` sur **regina.photo**
 
-Le site ne lit pas directement le contenu d'un dossier côté navigateur. Pour contourner proprement cette limite de GitHub Pages, le dépôt inclut :
+## Comment créer des albums
 
-- un dossier `assets/photos/` dans lequel tu déposes tes images
-- un script `scripts/build-gallery.js` qui génère `assets/data/gallery.json`
-- un workflow GitHub Actions qui exécute ce script automatiquement à chaque push sur `main` ou `master`
+- Place les images à la racine de `assets/photos/` → elles vont dans l’album **Portfolio**
+- Place les images dans un sous-dossier → le sous-dossier devient un album
 
-Résultat : tu ajoutes des photos, tu pushes, et la galerie se met à jour.
+Exemples :
 
-## Formats supportés
+- `assets/photos/portrait/image-01.jpg`
+- `assets/photos/travel/italy-01.jpg`
+- `assets/photos/fine-art/studio-shot.webp`
 
-- `.jpg`
-- `.jpeg`
-- `.png`
-- `.webp`
-- `.avif`
-- `.gif`
+## Comment la heatmap fonctionne
 
-## Déploiement
+Le script lit la date du dernier commit Git affectant chaque image, puis génère une heatmap sur le site.
+Le workflow GitHub Actions clone l’historique complet (`fetch-depth: 0`) pour que ces dates soient fiables.
 
-1. Crée un dépôt GitHub, idéalement `paulreginaphoto.github.io` ou un dépôt dédié si tu utilises un domaine custom.
-2. Upload le contenu de ce ZIP à la racine du dépôt.
-3. Vérifie que GitHub Pages publie bien depuis la branche principale.
-4. Le fichier `CNAME` est déjà configuré pour `regina.photo`.
+## Déploiement GitHub Pages
 
-## Ajouter des images
+1. Crée un repo sur le compte **paulreginaphoto**
+2. Upload le contenu de ce ZIP
+3. Active GitHub Pages depuis la branche `main`
+4. Garde le fichier `CNAME`
+5. Configure ton domaine `regina.photo` chez Namecheap vers GitHub Pages
 
-1. Dépose tes images dans `assets/photos/`
-2. Commit + push
-3. GitHub Actions régénère `assets/data/gallery.json`
-4. GitHub Pages affiche automatiquement les nouvelles images
+## Instagram
+
+Le site pointe vers :
+
+- `https://instagram.com/paulregina.photo`
