@@ -1,160 +1,386 @@
-
-<!DOCTYPE html>
-<html lang="en">
+---
+---
+<!doctype html>
+<html lang="fr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Paul Regina — Photography</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<style>
-:root{
-    --bg:#ffffff;
-    --text:#111111;
-    --muted:#777777;
-    --accent:#000000;
-}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{
-    font-family:'Inter',sans-serif;
-    background:var(--bg);
-    color:var(--text);
-}
-header{
-    padding:60px 40px 40px;
-    text-align:center;
-}
-h1{
-    font-family:'Playfair Display',serif;
-    font-size:42px;
-    font-weight:600;
-    letter-spacing:1px;
-}
-.subtitle{
-    margin-top:12px;
-    font-size:15px;
-    color:var(--muted);
-}
-nav{
-    margin-top:20px;
-}
-nav a{
-    text-decoration:none;
-    color:var(--text);
-    font-size:14px;
-    margin:0 10px;
-    border-bottom:1px solid transparent;
-    transition:all .3s ease;
-}
-nav a:hover{
-    border-bottom:1px solid var(--text);
-}
-.gallery{
-    column-count:3;
-    column-gap:20px;
-    padding:0 40px 80px;
-}
-.gallery-item{
-    break-inside:avoid;
-    margin-bottom:20px;
-    cursor:pointer;
-}
-.gallery-item img{
-    width:100%;
-    display:block;
-    transition:opacity .3s ease;
-}
-.gallery-item img:hover{
-    opacity:.85;
-}
-@media(max-width:1000px){
-    .gallery{column-count:2;}
-}
-@media(max-width:600px){
-    .gallery{column-count:1;padding:0 20px 60px;}
-}
-.lightbox{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:rgba(255,255,255,.97);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-    opacity:0;
-    visibility:hidden;
-    transition:all .3s ease;
-}
-.lightbox.active{
-    opacity:1;
-    visibility:visible;
-}
-.lightbox img{
-    max-width:90%;
-    max-height:90%;
-}
-.close{
-    position:absolute;
-    top:30px;
-    right:40px;
-    font-size:28px;
-    cursor:pointer;
-}
-footer{
-    text-align:center;
-    padding:40px 20px 60px;
-    font-size:13px;
-    color:var(--muted);
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Paul REGINA | Photography</title>
+  <meta name="description" content="Photography by Paul REGINA, based in Switzerland.">
+  <style>
+    :root{
+      --bg:#f7f4ef;
+      --surface:#ffffff;
+      --text:#151515;
+      --muted:#6f6b64;
+      --line:rgba(21,21,21,.10);
+      --shadow:0 20px 60px rgba(21,21,21,.08);
+      --shadow-strong:0 28px 80px rgba(21,21,21,.14);
+      --radius:22px;
+      --content:min(1380px, calc(100vw - 40px));
+      --content-mobile:calc(100vw - 24px);
+    }
+
+    *{ box-sizing:border-box; }
+    html{ scroll-behavior:smooth; }
+
+    body{
+      margin:0;
+      background:
+        radial-gradient(circle at top left, rgba(255,255,255,.85), rgba(255,255,255,0) 40%),
+        linear-gradient(180deg, #faf8f3 0%, #f6f2eb 100%);
+      color:var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    a{ color:inherit; text-decoration:none; }
+
+    .shell{
+      width:var(--content);
+      margin:0 auto;
+      padding:24px 0 36px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-start;
+      justify-content:space-between;
+      gap:24px;
+      padding:8px 0 0;
+    }
+
+    .brand{
+      min-width:0;
+      padding-right:16px;
+    }
+
+    .name{
+      margin:0;
+      font-family: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Palatino, "Times New Roman", serif;
+      font-size:clamp(2.15rem, 5.2vw, 4.9rem);
+      line-height:.95;
+      font-weight:600;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+    }
+
+    .subtitle{
+      margin:14px 0 0;
+      font-size:clamp(.92rem, 1.7vw, 1.08rem);
+      line-height:1.5;
+      color:var(--muted);
+      letter-spacing:.015em;
+    }
+
+    .insta{
+      flex:0 0 auto;
+      display:inline-flex;
+      align-items:center;
+      gap:10px;
+      padding:12px 0 8px;
+      font-size:.88rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--text);
+      border-bottom:1px solid var(--text);
+      transition:opacity .22s ease, transform .22s ease;
+      white-space:nowrap;
+    }
+
+    .insta:hover{
+      opacity:.68;
+      transform:translateY(-1px);
+    }
+
+    .intro-space{
+      height:clamp(34px, 5vw, 70px);
+    }
+
+    .section-title{
+      margin:0 0 26px;
+      font-size:.83rem;
+      font-weight:600;
+      letter-spacing:.26em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .gallery{
+      column-count:3;
+      column-gap:20px;
+    }
+
+    .card{
+      break-inside:avoid;
+      margin:0 0 20px;
+      border-radius:var(--radius);
+      overflow:hidden;
+      background:var(--surface);
+      box-shadow:var(--shadow);
+      border:1px solid rgba(255,255,255,.88);
+      cursor:zoom-in;
+      transition:transform .35s ease, box-shadow .35s ease;
+      position:relative;
+    }
+
+    .card::after{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.03));
+      opacity:.65;
+    }
+
+    .card:hover{
+      transform:translateY(-4px);
+      box-shadow:var(--shadow-strong);
+    }
+
+    .gallery-image{
+      display:block;
+      width:100%;
+      height:auto;
+      vertical-align:middle;
+      background:#efe9df;
+    }
+
+    footer{
+      width:var(--content);
+      margin:0 auto;
+      padding:34px 0 54px;
+      border-top:1px solid var(--line);
+      font-size:.82rem;
+      letter-spacing:.16em;
+      text-transform:uppercase;
+      color:var(--muted);
+    }
+
+    .lightbox{
+      position:fixed;
+      inset:0;
+      z-index:9999;
+      display:grid;
+      place-items:center;
+      padding:24px;
+      background:rgba(247,244,239,.92);
+      backdrop-filter:blur(10px);
+      -webkit-backdrop-filter:blur(10px);
+      opacity:0;
+      visibility:hidden;
+      transition:opacity .25s ease, visibility .25s ease;
+    }
+
+    .lightbox.is-open{
+      opacity:1;
+      visibility:visible;
+    }
+
+    .lightbox__inner{
+      position:relative;
+      width:min(92vw, 1580px);
+      height:min(88vh, 1100px);
+      display:grid;
+      place-items:center;
+    }
+
+    .lightbox__image{
+      max-width:100%;
+      max-height:100%;
+      width:auto;
+      height:auto;
+      border-radius:18px;
+      box-shadow:0 28px 90px rgba(21,21,21,.18);
+      background:#fff;
+    }
+
+    .lightbox__close{
+      position:absolute;
+      top:max(10px, env(safe-area-inset-top));
+      right:max(10px, env(safe-area-inset-right));
+      width:46px;
+      height:46px;
+      border:0;
+      border-radius:999px;
+      background:rgba(255,255,255,.88);
+      color:var(--text);
+      font-size:1.5rem;
+      line-height:1;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      box-shadow:0 10px 30px rgba(21,21,21,.08);
+      transition:transform .2s ease, opacity .2s ease;
+    }
+
+    .lightbox__close:hover{
+      transform:scale(1.04);
+      opacity:.75;
+    }
+
+    @media (max-width: 1100px){
+      .gallery{ column-count:2; }
+      .shell{ width:min(1200px, var(--content-mobile)); }
+      footer{ width:min(1200px, var(--content-mobile)); }
+    }
+
+    @media (max-width: 700px){
+      .shell{
+        width:var(--content-mobile);
+        padding-top:18px;
+      }
+
+      .topbar{
+        gap:14px;
+        align-items:flex-start;
+      }
+
+      .insta{
+        font-size:.75rem;
+        letter-spacing:.12em;
+        padding-top:8px;
+      }
+
+      .subtitle{
+        margin-top:10px;
+        max-width:28ch;
+      }
+
+      .intro-space{
+        height:26px;
+      }
+
+      .section-title{
+        margin-bottom:18px;
+        font-size:.76rem;
+      }
+
+      .gallery{
+        column-count:1;
+        column-gap:0;
+      }
+
+      .card{
+        margin-bottom:16px;
+        border-radius:18px;
+      }
+
+      footer{
+        width:var(--content-mobile);
+        padding:28px 0 42px;
+        font-size:.74rem;
+        letter-spacing:.12em;
+      }
+
+      .lightbox{
+        padding:14px;
+      }
+
+      .lightbox__inner{
+        width:100%;
+        height:100%;
+      }
+
+      .lightbox__image{
+        border-radius:14px;
+      }
+
+      .lightbox__close{
+        width:42px;
+        height:42px;
+        top:6px;
+        right:6px;
+      }
+    }
+  </style>
 </head>
 <body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <h1 class="name">Paul REGINA</h1>
+        <p class="subtitle">Photography — based in Switzerland</p>
+      </div>
+      <a class="insta" href="https://www.instagram.com/paulreginaphoto" target="_blank" rel="noopener noreferrer" aria-label="Instagram Paul REGINA">Instagram</a>
+    </header>
 
-<header>
-    <h1>Paul Regina</h1>
-    <div class="subtitle">Photography — Lausanne, Switzerland</div>
-    <nav>
-        <a href="https://www.instagram.com/paulreginaphoto" target="_blank">Instagram</a>
-    </nav>
-</header>
+    <div class="intro-space" aria-hidden="true"></div>
 
-<section class="gallery" id="gallery"></section>
+    <section aria-labelledby="gallery-title">
+      <h2 id="gallery-title" class="section-title">GALLERIE</h2>
 
-<div class="lightbox" id="lightbox">
-    <div class="close" onclick="closeLightbox()">×</div>
-    <img id="lightbox-img" src="">
-</div>
+      <div class="gallery">
+        {% assign sorted_files = site.static_files | sort: "name" %}
+        {% for file in sorted_files %}
+          {% if file.path contains '/photos/' %}
+            {% assign ext = file.extname | downcase %}
+            {% if ext == '.jpg' or ext == '.jpeg' or ext == '.png' or ext == '.webp' or ext == '.avif' or ext == '.gif' %}
+              <figure class="card">
+                <img
+                  class="gallery-image"
+                  src="{{ file.path | relative_url }}"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                >
+              </figure>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+      </div>
+    </section>
+  </main>
 
-<footer>
-    © Paul Regina — Lausanne, Switzerland
-</footer>
+  <footer>© Paul REGINA</footer>
 
-<script>
-fetch('assets/data/gallery.json')
-.then(response => response.json())
-.then(data => {
-    const gallery = document.getElementById('gallery');
-    data.images.forEach(src => {
-        const div = document.createElement('div');
-        div.className = 'gallery-item';
-        const img = document.createElement('img');
-        img.src = src;
-        img.onclick = () => openLightbox(src);
-        div.appendChild(img);
-        gallery.appendChild(div);
-    });
-});
+  <div class="lightbox" id="lightbox" aria-hidden="true">
+    <div class="lightbox__inner">
+      <button class="lightbox__close" type="button" id="lightboxClose" aria-label="Fermer">×</button>
+      <img class="lightbox__image" id="lightboxImage" alt="">
+    </div>
+  </div>
 
-function openLightbox(src){
-    document.getElementById('lightbox-img').src = src;
-    document.getElementById('lightbox').classList.add('active');
-}
-function closeLightbox(){
-    document.getElementById('lightbox').classList.remove('active');
-}
-</script>
+  <script>
+    (() => {
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImage = document.getElementById('lightboxImage');
+      const closeButton = document.getElementById('lightboxClose');
+      const images = Array.from(document.querySelectorAll('.gallery-image'));
 
+      if (!images.length) return;
+
+      const open = (src) => {
+        lightboxImage.src = src;
+        lightbox.classList.add('is-open');
+        lightbox.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+      };
+
+      const close = () => {
+        lightbox.classList.remove('is-open');
+        lightbox.setAttribute('aria-hidden', 'true');
+        lightboxImage.removeAttribute('src');
+        document.body.style.overflow = '';
+      };
+
+      images.forEach((img) => {
+        img.addEventListener('click', () => open(img.currentSrc || img.src));
+      });
+
+      closeButton.addEventListener('click', close);
+
+      lightbox.addEventListener('click', (event) => {
+        if (event.target === lightbox) close();
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && lightbox.classList.contains('is-open')) {
+          close();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
