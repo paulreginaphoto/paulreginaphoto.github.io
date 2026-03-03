@@ -7,11 +7,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Paul REGINA | Photography</title>
   <meta name="description" content="Photography by Paul REGINA, based in Switzerland.">
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  <link rel="icon" href="favicon-32x32.png" sizes="32x32" type="image/png">
-  <link rel="icon" href="favicon-192x192.png" sizes="192x192" type="image/png">
-  <link rel="icon" href="favicon.ico" sizes="any">
-  <link rel="apple-touch-icon" href="apple-touch-icon.png">
   <style>
     :root{
       --bg:#f7f4ef;
@@ -272,6 +267,45 @@
       opacity:.75;
     }
 
+    .lightbox__nav{
+      position:absolute;
+      top:50%;
+      transform:translateY(-50%);
+      width:52px;
+      height:52px;
+      border:0;
+      border-radius:999px;
+      background:rgba(255,255,255,.92);
+      color:var(--text);
+      font-size:1.45rem;
+      line-height:1;
+      display:grid;
+      place-items:center;
+      cursor:pointer;
+      box-shadow:0 10px 30px rgba(21,21,21,.08);
+      transition:transform .2s ease, opacity .2s ease;
+      z-index:2;
+    }
+
+    .lightbox__nav:hover{
+      transform:translateY(-50%) scale(1.04);
+      opacity:.75;
+    }
+
+    .lightbox__nav--prev{
+      left:max(10px, env(safe-area-inset-left));
+    }
+
+    .lightbox__nav--next{
+      right:max(10px, env(safe-area-inset-right));
+    }
+
+    .lightbox__nav[disabled]{
+      opacity:.35;
+      cursor:default;
+      pointer-events:none;
+    }
+
     @media (max-width: 1100px){
       .gallery{ column-count:2; }
       .shell{ width:min(1200px, var(--content-mobile)); }
@@ -346,6 +380,20 @@
         top:6px;
         right:6px;
       }
+
+      .lightbox__nav{
+        width:42px;
+        height:42px;
+        font-size:1.2rem;
+      }
+
+      .lightbox__nav--prev{
+        left:6px;
+      }
+
+      .lightbox__nav--next{
+        right:6px;
+      }
     }
   </style>
 </head>
@@ -391,6 +439,8 @@
   <div class="lightbox" id="lightbox" aria-hidden="true">
     <div class="lightbox__inner">
       <button class="lightbox__close" type="button" id="lightboxClose" aria-label="Fermer">×</button>
+      <button class="lightbox__nav lightbox__nav--prev" type="button" id="lightboxPrev" aria-label="Image précédente">‹</button>
+      <button class="lightbox__nav lightbox__nav--next" type="button" id="lightboxNext" aria-label="Image suivante">›</button>
       <div class="lightbox__stage" id="lightboxStage">
         <div class="lightbox__canvas" id="lightboxCanvas">
           <img class="lightbox__image" id="lightboxImage" alt="">
@@ -406,23 +456,37 @@
       const lightboxCanvas = document.getElementById('lightboxCanvas');
       const lightboxImage = document.getElementById('lightboxImage');
       const closeButton = document.getElementById('lightboxClose');
+      const prevButton = document.getElementById('lightboxPrev');
+      const nextButton = document.getElementById('lightboxNext');
       const images = Array.from(document.querySelectorAll('.gallery-image'));
 
       if (!images.length) return;
 
       const MIN_ZOOM = 1;
       const MAX_ZOOM = 4;
+      const SWIPE_THRESHOLD = 56;
+
       let zoom = 1;
       let fitWidth = 0;
       let fitHeight = 0;
       let isPointerDown = false;
       let hasDragged = false;
+      let currentIndex = -1;
       let startX = 0;
       let startY = 0;
       let startScrollLeft = 0;
       let startScrollTop = 0;
+      let swipeStartX = 0;
+      let swipeStartY = 0;
+      let isSwipeTracking = false;
+      let suppressTap = false;
 
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+      const updateNavButtons = () => {
+        prevButton.disabled = currentIndex <= 0;
+        nextButton.disabled = currentIndex >= images.length - 1;
+      };
 
       const applyZoom = (clientX = null, clientY = null) => {
         if (!fitWidth || !fitHeight) return;
@@ -489,6 +553,8 @@
         fitHeight = 0;
         isPointerDown = false;
         hasDragged = false;
+        isSwipeTracking = false;
+        suppressTap = false;
 
         lightbox.classList.add('is-open');
         lightbox.setAttribute('aria-hidden', 'false');
@@ -499,10 +565,27 @@
         lightboxImage.removeAttribute('style');
         lightboxImage.classList.remove('is-zoomed', 'is-dragging');
         lightboxImage.src = src;
+        updateNavButtons();
 
         if (lightboxImage.complete) {
           computeFit();
         }
+      };
+
+      const openByIndex = (index) => {
+        if (index < 0 || index >= images.length) return;
+        currentIndex = index;
+        open(images[currentIndex].currentSrc || images[currentIndex].src);
+      };
+
+      const showPrevious = () => {
+        if (currentIndex <= 0) return;
+        openByIndex(currentIndex - 1);
+      };
+
+      const showNext = () => {
+        if (currentIndex >= images.length - 1) return;
+        openByIndex(currentIndex + 1);
       };
 
       const close = () => {
@@ -517,16 +600,23 @@
         fitHeight = 0;
         isPointerDown = false;
         hasDragged = false;
+        isSwipeTracking = false;
+        suppressTap = false;
       };
 
-      images.forEach((img) => {
-        img.addEventListener('click', () => open(img.currentSrc || img.src));
+      images.forEach((img, index) => {
+        img.addEventListener('click', () => openByIndex(index));
       });
 
       lightboxImage.addEventListener('load', computeFit);
 
       lightboxImage.addEventListener('click', (event) => {
         event.stopPropagation();
+
+        if (suppressTap) {
+          suppressTap = false;
+          return;
+        }
 
         if (hasDragged) {
           hasDragged = false;
@@ -601,9 +691,55 @@
       lightboxImage.addEventListener('pointercancel', endPointer);
       lightboxImage.addEventListener('pointerleave', endPointer);
 
+      lightboxStage.addEventListener('touchstart', (event) => {
+        if (!lightbox.classList.contains('is-open') || zoom > 1 || event.touches.length !== 1) return;
+
+        swipeStartX = event.touches[0].clientX;
+        swipeStartY = event.touches[0].clientY;
+        isSwipeTracking = true;
+      }, { passive: true });
+
+      lightboxStage.addEventListener('touchend', (event) => {
+        if (!isSwipeTracking || zoom > 1 || !event.changedTouches.length) {
+          isSwipeTracking = false;
+          return;
+        }
+
+        const deltaX = event.changedTouches[0].clientX - swipeStartX;
+        const deltaY = event.changedTouches[0].clientY - swipeStartY;
+
+        isSwipeTracking = false;
+
+        if (Math.abs(deltaX) < SWIPE_THRESHOLD) return;
+        if (Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
+
+        suppressTap = true;
+
+        if (deltaX < 0) {
+          showNext();
+        } else {
+          showPrevious();
+        }
+      }, { passive: true });
+
+      prevButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        showPrevious();
+      });
+
+      nextButton.addEventListener('click', (event) => {
+        event.stopPropagation();
+        showNext();
+      });
+
       closeButton.addEventListener('click', close);
 
       lightbox.addEventListener('click', (event) => {
+        if (suppressTap) {
+          suppressTap = false;
+          return;
+        }
+
         if (event.target === lightbox || event.target === lightboxStage || event.target === lightboxCanvas) {
           close();
         }
@@ -614,6 +750,18 @@
 
         if (event.key === 'Escape') {
           close();
+          return;
+        }
+
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          showPrevious();
+          return;
+        }
+
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          showNext();
           return;
         }
 
