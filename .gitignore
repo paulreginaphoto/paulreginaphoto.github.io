@@ -1,5 +1,7 @@
 # On ignore tout ce qui est dans le dossier raw
 /raw/*
 
-# Sauf le fichier .gitkeep qui permet de garder le dossier "vivant"
+
+
 !/raw/.gitkeep
+!/thumbs/.gitkeep
