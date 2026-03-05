@@ -159,7 +159,6 @@
       column-gap:20px;
     }
 
-
     .card{
       break-inside:avoid;
       margin:0 0 20px;
@@ -526,11 +525,11 @@
               {% assign meta = site.data.thumbs[file.path] %}
               <figure class="card">
                 <img
-                  class="gallery-image"
-                  src="{{ file.path | relative_url }}"
+                  class="gallery-image js-thumb"
+                  src="data:image/gif;base64,R0lGODlhAQABAAAAACw="
+                  data-src="{{ file.path | relative_url }}"
                   data-full="{{ full_path | relative_url }}"
                   alt=""
-                  loading="lazy"
                   decoding="async"
                   {% if meta and meta.w and meta.h %}width="{{ meta.w }}" height="{{ meta.h }}"{% endif %}
                   {% if forloop.index <= 6 %}fetchpriority="high"{% endif %}
@@ -569,28 +568,13 @@
       const nextButton = document.getElementById('lightboxNext');
       const images = Array.from(document.querySelectorAll('.gallery-image'));
 
-      if (!images.length) {
-        return;
-      }
+      if (!images.length) return;
 
-      const MIN_ZOOM = 1;
-      const MAX_ZOOM = 4;
+      // ==========================================================
+      // 1) Chargement des thumbs UNE PAR UNE (concurrence = 1)
+      // ==========================================================
+      const ROOT_MARGIN = "350px";
       const SWIPE_THRESHOLD = 56;
-
-      let zoom = 1;
-      let fitWidth = 0;
-      let fitHeight = 0;
-      let isPointerDown = false;
-      let hasDragged = false;
-      let currentIndex = -1;
-      let startX = 0;
-      let startY = 0;
-      let startScrollLeft = 0;
-      let startScrollTop = 0;
-      let swipeStartX = 0;
-      let swipeStartY = 0;
-      let isSwipeTracking = false;
-      let suppressTap = false;
 
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
@@ -617,10 +601,7 @@
         }
 
         return new Promise((resolve) => {
-          const finish = () => {
-            done();
-            resolve();
-          };
+          const finish = () => { done(); resolve(); };
 
           const onLoad = () => {
             if (typeof img.decode === 'function') {
@@ -630,29 +611,85 @@
             }
           };
 
-          const onError = finish;
-
           img.addEventListener('load', onLoad, { once: true });
-          img.addEventListener('error', onError, { once: true });
+          img.addEventListener('error', finish, { once: true });
         });
       };
 
-      const revealCount = window.matchMedia('(max-width: 700px)').matches
-        ? 2
-        : window.matchMedia('(max-width: 1100px)').matches
-          ? 4
-          : 6;
+      // Queue stricte: 1 téléchargement à la fois
+      let inFlight = false;
+      const queue = [];
 
-      const priorityImages = images.slice(0, Math.min(revealCount, images.length));
-      const remainingImages = images.slice(priorityImages.length);
+      const enqueue = (img) => {
+        if (!img) return;
+        if (img.dataset.queued === '1') return;
+        if (img.dataset.loaded === '1') return;
 
-      Promise.all(priorityImages.map(settleImage))
-        .catch(() => {})
-        .then(() => {
-          remainingImages.forEach((img) => {
-            settleImage(img).catch(() => {});
+        img.dataset.queued = '1';
+        queue.push(img);
+        pump();
+      };
+
+      const pump = () => {
+        if (inFlight) return;
+        const img = queue.shift();
+        if (!img) return;
+
+        const src = img.dataset.src;
+        if (!src) return;
+
+        inFlight = true;
+        img.dataset.loaded = '1';
+
+        img.src = src;
+
+        settleImage(img)
+          .catch(() => {})
+          .finally(() => {
+            inFlight = false;
+            pump();
           });
+      };
+
+      // Premier lot (au-dessus de la ligne de flottaison) : une par une
+      const revealCount =
+        window.matchMedia('(max-width: 700px)').matches ? 2 :
+        window.matchMedia('(max-width: 1100px)').matches ? 4 : 6;
+
+      images.slice(0, Math.min(revealCount, images.length)).forEach(enqueue);
+
+      // Le reste: au scroll, toujours une par une
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
+          if (e.isIntersecting) {
+            enqueue(e.target);
+            io.unobserve(e.target);
+          }
         });
+      }, { root: null, rootMargin: ROOT_MARGIN, threshold: 0.01 });
+
+      images.slice(revealCount).forEach((img) => io.observe(img));
+
+      // ==========================================================
+      // 2) Lightbox (HD) + navigation (inchangé sauf src = data-full)
+      // ==========================================================
+      const MIN_ZOOM = 1;
+      const MAX_ZOOM = 4;
+
+      let zoom = 1;
+      let fitWidth = 0;
+      let fitHeight = 0;
+      let isPointerDown = false;
+      let hasDragged = false;
+      let currentIndex = -1;
+      let startX = 0;
+      let startY = 0;
+      let startScrollLeft = 0;
+      let startScrollTop = 0;
+      let swipeStartX = 0;
+      let swipeStartY = 0;
+      let isSwipeTracking = false;
+      let suppressTap = false;
 
       const updateNavButtons = () => {
         prevButton.disabled = currentIndex <= 0;
@@ -664,7 +701,7 @@
           .filter((index) => index >= 0 && index < images.length)
           .forEach((index) => {
             const preload = new Image();
-            preload.src = images[index].dataset.full || images[index].currentSrc || images[index].src;
+            preload.src = images[index].dataset.full || images[index].src;
           });
       };
 
@@ -763,7 +800,7 @@
       const openByIndex = (index) => {
         if (index < 0 || index >= images.length) return;
         currentIndex = index;
-        const src = images[currentIndex].dataset.full || images[currentIndex].currentSrc || images[currentIndex].src;
+        const src = images[currentIndex].dataset.full || images[currentIndex].src;
         open(src);
       };
 
@@ -805,15 +842,8 @@
       lightboxImage.addEventListener('click', (event) => {
         event.stopPropagation();
 
-        if (suppressTap) {
-          suppressTap = false;
-          return;
-        }
-
-        if (hasDragged) {
-          hasDragged = false;
-          return;
-        }
+        if (suppressTap) { suppressTap = false; return; }
+        if (hasDragged) { hasDragged = false; return; }
 
         zoom = zoom > 1 ? 1 : 2;
         applyZoom(event.clientX, event.clientY);
@@ -821,7 +851,6 @@
 
       lightboxStage.addEventListener('wheel', (event) => {
         if (!lightbox.classList.contains('is-open')) return;
-
         event.preventDefault();
 
         const nextZoom = clamp(
@@ -831,7 +860,6 @@
         );
 
         if (nextZoom === zoom) return;
-
         zoom = nextZoom;
         applyZoom(event.clientX, event.clientY);
       }, { passive: false });
@@ -873,9 +901,7 @@
         lightboxImage.classList.remove('is-dragging');
 
         if (typeof lightboxImage.releasePointerCapture === 'function') {
-          try {
-            lightboxImage.releasePointerCapture(event.pointerId);
-          } catch (_) {}
+          try { lightboxImage.releasePointerCapture(event.pointerId); } catch (_) {}
         }
       };
 
@@ -885,7 +911,6 @@
 
       lightboxStage.addEventListener('touchstart', (event) => {
         if (!lightbox.classList.contains('is-open') || zoom > 1 || event.touches.length !== 1) return;
-
         swipeStartX = event.touches[0].clientX;
         swipeStartY = event.touches[0].clientY;
         isSwipeTracking = true;
@@ -906,56 +931,25 @@
         if (Math.abs(deltaX) <= Math.abs(deltaY) * 1.2) return;
 
         suppressTap = true;
-
-        if (deltaX < 0) {
-          showNext();
-        } else {
-          showPrevious();
-        }
+        if (deltaX < 0) showNext(); else showPrevious();
       }, { passive: true });
 
-      prevButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        showPrevious();
-      });
-
-      nextButton.addEventListener('click', (event) => {
-        event.stopPropagation();
-        showNext();
-      });
-
+      prevButton.addEventListener('click', (event) => { event.stopPropagation(); showPrevious(); });
+      nextButton.addEventListener('click', (event) => { event.stopPropagation(); showNext(); });
       closeButton.addEventListener('click', close);
 
       lightbox.addEventListener('click', (event) => {
-        if (suppressTap) {
-          suppressTap = false;
-          return;
-        }
-
-        if (event.target === lightbox || event.target === lightboxStage || event.target === lightboxCanvas) {
-          close();
-        }
+        if (suppressTap) { suppressTap = false; return; }
+        if (event.target === lightbox || event.target === lightboxStage || event.target === lightboxCanvas) close();
       });
 
       document.addEventListener('keydown', (event) => {
         if (!lightbox.classList.contains('is-open')) return;
 
-        if (event.key === 'Escape') {
-          close();
-          return;
-        }
+        if (event.key === 'Escape') { close(); return; }
 
-        if (event.key === 'ArrowLeft') {
-          event.preventDefault();
-          showPrevious();
-          return;
-        }
-
-        if (event.key === 'ArrowRight') {
-          event.preventDefault();
-          showNext();
-          return;
-        }
+        if (event.key === 'ArrowLeft') { event.preventDefault(); showPrevious(); return; }
+        if (event.key === 'ArrowRight') { event.preventDefault(); showNext(); return; }
 
         if (event.key === '+' || event.key === '=') {
           zoom = clamp(zoom + 0.2, MIN_ZOOM, MAX_ZOOM);
@@ -969,9 +963,7 @@
       });
 
       window.addEventListener('resize', () => {
-        if (lightbox.classList.contains('is-open') && lightboxImage.getAttribute('src')) {
-          computeFit();
-        }
+        if (lightbox.classList.contains('is-open') && lightboxImage.getAttribute('src')) computeFit();
       });
     })();
   </script>
