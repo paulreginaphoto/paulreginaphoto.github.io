@@ -1,5 +1,3 @@
----
----
 <!doctype html>
 <html lang="fr">
 <head>
@@ -7,6 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Paul REGINA | Photography</title>
   <meta name="description" content="Photography by Paul REGINA, based in Switzerland.">
+
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/site.webmanifest">
+  <meta name="theme-color" content="#ffffff">
+  <script>
+    document.documentElement.classList.add('js');
+  </script>
   <style>
     :root{
       --bg:#f7f4ef;
@@ -112,20 +121,21 @@
     }
 
     .insta__icon{
-      width:16px;
-      height:16px;
+      width:17px;
+      height:17px;
       display:block;
-      flex:0 0 16px;
+      flex:0 0 auto;
     }
 
     .insta__icon svg{
+      display:block;
       width:100%;
       height:100%;
-      display:block;
-    }
-
-    .insta__label{
-      line-height:1;
+      stroke:currentColor;
+      fill:none;
+      stroke-width:1.85;
+      stroke-linecap:round;
+      stroke-linejoin:round;
     }
 
     .intro-space{
@@ -146,23 +156,41 @@
       column-gap:20px;
     }
 
+
     .card{
       break-inside:avoid;
       margin:0 0 20px;
       border-radius:var(--radius);
       overflow:hidden;
-      background:var(--surface);
+      background:linear-gradient(180deg, #f2ece2 0%, #ece5da 100%);
       box-shadow:var(--shadow);
       border:1px solid rgba(255,255,255,.88);
       cursor:zoom-in;
       transition:transform .35s ease, box-shadow .35s ease;
       position:relative;
+      isolation:isolate;
+    }
+
+    .card::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      z-index:0;
+      background:linear-gradient(110deg, rgba(255,255,255,.18) 18%, rgba(255,255,255,.62) 40%, rgba(255,255,255,.18) 62%);
+      background-size:220% 100%;
+      animation:shimmer 1.35s linear infinite;
+      transition:opacity .35s ease;
+    }
+
+    .card.is-loaded::before{
+      opacity:0;
     }
 
     .card::after{
       content:"";
       position:absolute;
       inset:0;
+      z-index:1;
       pointer-events:none;
       background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(0,0,0,.03));
       opacity:.65;
@@ -174,11 +202,34 @@
     }
 
     .gallery-image{
+      position:relative;
+      z-index:2;
       display:block;
       width:100%;
       height:auto;
       vertical-align:middle;
       background:#efe9df;
+      opacity:0;
+      transform:scale(1.018);
+      filter:blur(10px);
+      transition:
+        opacity .55s ease,
+        transform .75s cubic-bezier(.2,.7,.2,1),
+        filter .75s ease;
+      backface-visibility:hidden;
+      -webkit-backface-visibility:hidden;
+      will-change:opacity, transform, filter;
+    }
+
+    .card.is-loaded .gallery-image{
+      opacity:1;
+      transform:none;
+      filter:blur(0);
+    }
+
+    @keyframes shimmer{
+      from{ background-position:220% 0; }
+      to{ background-position:-220% 0; }
     }
 
     footer{
@@ -265,6 +316,14 @@
       -webkit-user-drag:none;
       cursor:zoom-in;
       touch-action:none;
+      opacity:0;
+      transform:scale(.985);
+      transition:opacity .22s ease, transform .22s ease;
+    }
+
+    .lightbox__image.is-visible{
+      opacity:1;
+      transform:none;
     }
 
     .lightbox__image.is-zoomed{
@@ -363,12 +422,6 @@
         padding:9px 12px;
       }
 
-      .insta__icon{
-        width:14px;
-        height:14px;
-        flex-basis:14px;
-      }
-
       .subtitle{
         margin-top:10px;
         max-width:28ch;
@@ -445,13 +498,13 @@
       </div>
       <a class="insta" href="https://www.instagram.com/paulreginaphoto" target="_blank" rel="noopener noreferrer" aria-label="Instagram Paul REGINA">
         <span class="insta__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" role="img" aria-hidden="true">
-            <rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5.25" stroke="currentColor" stroke-width="1.8"/>
-            <circle cx="12" cy="12" r="4.1" stroke="currentColor" stroke-width="1.8"/>
-            <circle cx="17.55" cy="6.55" r="1.15" fill="currentColor"/>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <rect x="3.25" y="3.25" width="17.5" height="17.5" rx="5"></rect>
+            <circle cx="12" cy="12" r="4.1"></circle>
+            <circle cx="17.35" cy="6.65" r="1"></circle>
           </svg>
         </span>
-        <span class="insta__label">Instagram</span>
+        <span>Instagram</span>
       </a>
     </header>
 
@@ -473,6 +526,7 @@
                   alt=""
                   loading="lazy"
                   decoding="async"
+                  {% if forloop.index <= 6 %}fetchpriority="high"{% endif %}
                 >
               </figure>
             {% endif %}
@@ -508,7 +562,9 @@
       const nextButton = document.getElementById('lightboxNext');
       const images = Array.from(document.querySelectorAll('.gallery-image'));
 
-      if (!images.length) return;
+      if (!images.length) {
+        return;
+      }
 
       const MIN_ZOOM = 1;
       const MAX_ZOOM = 4;
@@ -531,9 +587,84 @@
 
       const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+      const markCardLoaded = (img) => {
+        const card = img.closest('.card');
+        if (!card) return;
+        requestAnimationFrame(() => card.classList.add('is-loaded'));
+      };
+
+      const settleImage = (img) => {
+        if (img.dataset.ready === '1') return Promise.resolve();
+
+        const done = () => {
+          img.dataset.ready = '1';
+          markCardLoaded(img);
+        };
+
+        if (img.complete) {
+          if (img.naturalWidth && typeof img.decode === 'function') {
+            return img.decode().catch(() => {}).then(done);
+          }
+          done();
+          return Promise.resolve();
+        }
+
+        return new Promise((resolve) => {
+          const finish = () => {
+            done();
+            resolve();
+          };
+
+          const onLoad = () => {
+            if (typeof img.decode === 'function') {
+              img.decode().catch(() => {}).then(finish);
+            } else {
+              finish();
+            }
+          };
+
+          const onError = finish;
+
+          img.addEventListener('load', onLoad, { once: true });
+          img.addEventListener('error', onError, { once: true });
+        });
+      };
+
+      const revealCount = window.matchMedia('(max-width: 700px)').matches
+        ? 2
+        : window.matchMedia('(max-width: 1100px)').matches
+          ? 4
+          : 6;
+
+      const priorityImages = images.slice(0, Math.min(revealCount, images.length));
+      const remainingImages = images.slice(priorityImages.length);
+
+      Promise.all(priorityImages.map(settleImage))
+        .catch(() => {})
+        .then(() => {
+          remainingImages.forEach((img) => {
+            settleImage(img).catch(() => {});
+          });
+        });
+
       const updateNavButtons = () => {
         prevButton.disabled = currentIndex <= 0;
         nextButton.disabled = currentIndex >= images.length - 1;
+      };
+
+      const preloadAround = () => {
+        [currentIndex - 1, currentIndex + 1]
+          .filter((index) => index >= 0 && index < images.length)
+          .forEach((index) => {
+            const preload = new Image();
+            preload.src = images[index].currentSrc || images[index].src;
+          });
+      };
+
+      const showLightboxImage = () => {
+        requestAnimationFrame(() => {
+          lightboxImage.classList.add('is-visible');
+        });
       };
 
       const applyZoom = (clientX = null, clientY = null) => {
@@ -610,13 +741,15 @@
         lightboxStage.scrollLeft = 0;
         lightboxStage.scrollTop = 0;
 
+        lightboxImage.classList.remove('is-visible', 'is-zoomed', 'is-dragging');
         lightboxImage.removeAttribute('style');
-        lightboxImage.classList.remove('is-zoomed', 'is-dragging');
         lightboxImage.src = src;
         updateNavButtons();
+        preloadAround();
 
-        if (lightboxImage.complete) {
+        if (lightboxImage.complete && lightboxImage.naturalWidth) {
           computeFit();
+          showLightboxImage();
         }
       };
 
@@ -641,7 +774,7 @@
         lightbox.setAttribute('aria-hidden', 'true');
         lightboxImage.removeAttribute('src');
         lightboxImage.removeAttribute('style');
-        lightboxImage.classList.remove('is-zoomed', 'is-dragging');
+        lightboxImage.classList.remove('is-visible', 'is-zoomed', 'is-dragging');
         document.body.style.overflow = '';
         zoom = 1;
         fitWidth = 0;
@@ -656,7 +789,10 @@
         img.addEventListener('click', () => openByIndex(index));
       });
 
-      lightboxImage.addEventListener('load', computeFit);
+      lightboxImage.addEventListener('load', () => {
+        computeFit();
+        showLightboxImage();
+      });
 
       lightboxImage.addEventListener('click', (event) => {
         event.stopPropagation();
