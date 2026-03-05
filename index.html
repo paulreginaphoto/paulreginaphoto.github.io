@@ -302,8 +302,29 @@
       align-items:center;
       justify-content:center;
       padding:clamp(14px, 2vw, 22px);
+      position:relative;
     }
 
+    /* Thumb placeholder (derrière), visible immédiatement */
+    .lightbox__thumb{
+      position:absolute;
+      inset:auto;
+      max-width:100%;
+      max-height:100%;
+      border-radius:18px;
+      filter:blur(10px);
+      opacity:.85;
+      transform:scale(1.01);
+      transition:opacity .18s ease, filter .18s ease, transform .18s ease;
+      box-shadow:0 28px 90px rgba(21,21,21,.10);
+      background:#fff;
+      user-select:none;
+      -webkit-user-select:none;
+      -webkit-user-drag:none;
+      pointer-events:none;
+    }
+
+    /* Full image (devant) */
     .lightbox__image{
       display:block;
       width:auto;
@@ -320,7 +341,9 @@
       touch-action:none;
       opacity:0;
       transform:scale(.985);
-      transition:opacity .22s ease, transform .22s ease;
+      transition:opacity .18s ease, transform .18s ease;
+      position:relative;
+      z-index:2;
     }
 
     .lightbox__image.is-visible{
@@ -354,7 +377,7 @@
       cursor:pointer;
       box-shadow:0 10px 30px rgba(21,21,21,.08);
       transition:transform .2s ease, opacity .2s ease;
-      z-index:2;
+      z-index:3;
     }
 
     .lightbox__close:hover{
@@ -379,7 +402,7 @@
       cursor:pointer;
       box-shadow:0 10px 30px rgba(21,21,21,.08);
       transition:transform .2s ease, opacity .2s ease;
-      z-index:2;
+      z-index:3;
     }
 
     .lightbox__nav:hover{
@@ -465,6 +488,7 @@
       }
 
       .lightbox__stage,
+      .lightbox__thumb,
       .lightbox__image{
         border-radius:16px;
       }
@@ -551,6 +575,7 @@
       <button class="lightbox__nav lightbox__nav--next" type="button" id="lightboxNext" aria-label="Image suivante">›</button>
       <div class="lightbox__stage" id="lightboxStage">
         <div class="lightbox__canvas" id="lightboxCanvas">
+          <img class="lightbox__thumb" id="lightboxThumb" alt="" aria-hidden="true">
           <img class="lightbox__image" id="lightboxImage" alt="">
         </div>
       </div>
@@ -562,6 +587,7 @@
       const lightbox = document.getElementById('lightbox');
       const lightboxStage = document.getElementById('lightboxStage');
       const lightboxCanvas = document.getElementById('lightboxCanvas');
+      const lightboxThumb = document.getElementById('lightboxThumb');
       const lightboxImage = document.getElementById('lightboxImage');
       const closeButton = document.getElementById('lightboxClose');
       const prevButton = document.getElementById('lightboxPrev');
@@ -616,7 +642,6 @@
         });
       };
 
-      // Queue stricte: 1 téléchargement à la fois
       let inFlight = false;
       const queue = [];
 
@@ -651,14 +676,12 @@
           });
       };
 
-      // Premier lot (au-dessus de la ligne de flottaison) : une par une
       const revealCount =
         window.matchMedia('(max-width: 700px)').matches ? 2 :
         window.matchMedia('(max-width: 1100px)').matches ? 4 : 6;
 
       images.slice(0, Math.min(revealCount, images.length)).forEach(enqueue);
 
-      // Le reste: au scroll, toujours une par une
       const io = new IntersectionObserver((entries) => {
         entries.forEach((e) => {
           if (e.isIntersecting) {
@@ -671,7 +694,7 @@
       images.slice(revealCount).forEach((img) => io.observe(img));
 
       // ==========================================================
-      // 2) Lightbox (HD) + navigation (inchangé sauf src = data-full)
+      // 2) Lightbox (thumb placeholder + preload next->prev + fix glitch)
       // ==========================================================
       const MIN_ZOOM = 1;
       const MAX_ZOOM = 4;
@@ -691,23 +714,49 @@
       let isSwipeTracking = false;
       let suppressTap = false;
 
+      // Cache de préloads (promesses) pour éviter doublons
+      const fullPreloadPromises = new Map();
+
+      const preloadFull = (index) => {
+        if (index < 0 || index >= images.length) return Promise.resolve(false);
+
+        const url = images[index].dataset.full;
+        if (!url) return Promise.resolve(false);
+
+        if (fullPreloadPromises.has(url)) return fullPreloadPromises.get(url);
+
+        const p = new Promise((resolve) => {
+          const im = new Image();
+          im.decoding = "async";
+          im.onload = () => resolve(true);
+          im.onerror = () => resolve(false);
+          im.src = url;
+        });
+
+        fullPreloadPromises.set(url, p);
+        return p;
+      };
+
+      const preloadNextThenPrev = async () => {
+        const next = currentIndex + 1;
+        const prev = currentIndex - 1;
+
+        // priorité: next
+        await preloadFull(next);
+        // puis prev (si pas déjà en cache)
+        await preloadFull(prev);
+      };
+
       const updateNavButtons = () => {
         prevButton.disabled = currentIndex <= 0;
         nextButton.disabled = currentIndex >= images.length - 1;
       };
 
-      const preloadAround = () => {
-        [currentIndex - 1, currentIndex + 1]
-          .filter((index) => index >= 0 && index < images.length)
-          .forEach((index) => {
-            const preload = new Image();
-            preload.src = images[index].dataset.full || images[index].src;
-          });
-      };
-
-      const showLightboxImage = () => {
+      const showFullVisible = () => {
         requestAnimationFrame(() => {
           lightboxImage.classList.add('is-visible');
+          // Une fois la full visible, on atténue la thumb derrière
+          lightboxThumb.style.opacity = "0";
         });
       };
 
@@ -767,10 +816,23 @@
         fitWidth = Math.max(1, Math.round(lightboxImage.naturalWidth * fitScale));
         fitHeight = Math.max(1, Math.round(lightboxImage.naturalHeight * fitScale));
         zoom = 1;
-        applyZoom();
+
+        // IMPORTANT: on applique la taille AVANT d'afficher (supprime le glitch)
+        lightboxImage.style.width = `${fitWidth}px`;
+        lightboxImage.style.height = `${fitHeight}px`;
+        lightboxImage.classList.remove('is-zoomed');
+        lightboxImage.style.cursor = 'zoom-in';
+        lightboxStage.scrollLeft = 0;
+        lightboxStage.scrollTop = 0;
       };
 
-      const open = (src) => {
+      const openByIndex = async (index) => {
+        if (index < 0 || index >= images.length) return;
+
+        currentIndex = index;
+        updateNavButtons();
+
+        // Reset états
         zoom = 1;
         fitWidth = 0;
         fitHeight = 0;
@@ -779,29 +841,60 @@
         isSwipeTracking = false;
         suppressTap = false;
 
+        // UI open
         lightbox.classList.add('is-open');
         lightbox.setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         lightboxStage.scrollLeft = 0;
         lightboxStage.scrollTop = 0;
 
+        // 1) Afficher la thumb immédiatement en placeholder
+        // On utilise data-src (thumb) pour être sûr même si elle n'est pas encore chargée dans la grille
+        const thumbSrc = images[currentIndex].dataset.src || images[currentIndex].currentSrc || images[currentIndex].src;
+        lightboxThumb.style.opacity = "1";
+        lightboxThumb.style.filter = "blur(10px)";
+        lightboxThumb.style.transform = "scale(1.01)";
+        lightboxThumb.src = thumbSrc;
+
+        // 2) Masquer la full tant qu'on n'a pas le fit (supprime le glitch)
         lightboxImage.classList.remove('is-visible', 'is-zoomed', 'is-dragging');
-        lightboxImage.removeAttribute('style');
-        lightboxImage.src = src;
-        updateNavButtons();
-        preloadAround();
+        lightboxImage.style.opacity = "0";
+        lightboxImage.style.transform = "scale(.985)";
+        lightboxImage.removeAttribute('src');
+        lightboxImage.removeAttribute('style'); // reset, puis on réapplique après fit
+        // Re-masquer après reset
+        lightboxImage.classList.remove('is-visible', 'is-zoomed', 'is-dragging');
+        lightboxImage.style.opacity = "0";
+        lightboxImage.style.transform = "scale(.985)";
+
+        const fullSrc = images[currentIndex].dataset.full || images[currentIndex].src;
+
+        // 3) Charger la full via préload promise (évite double chargement)
+        await preloadFull(currentIndex);
+
+        // 4) Appliquer la full, calculer fit, puis afficher
+        // On force un nouveau chargement du <img> de la lightbox pour avoir naturalWidth/Height
+        // (l'image est généralement déjà en cache après preloadFull)
+        lightboxImage.classList.remove('is-visible');
+        lightboxImage.src = fullSrc;
 
         if (lightboxImage.complete && lightboxImage.naturalWidth) {
           computeFit();
-          showLightboxImage();
+          showFullVisible();
+        } else {
+          // Au load: fit puis visible (toujours dans cet ordre)
+          const onLoad = () => {
+            computeFit();
+            showFullVisible();
+          };
+          lightboxImage.addEventListener('load', onLoad, { once: true });
+          lightboxImage.addEventListener('error', () => {
+            // En cas d'erreur, on garde la thumb
+          }, { once: true });
         }
-      };
 
-      const openByIndex = (index) => {
-        if (index < 0 || index >= images.length) return;
-        currentIndex = index;
-        const src = images[currentIndex].dataset.full || images[currentIndex].src;
-        open(src);
+        // 5) Préload next puis prev
+        preloadNextThenPrev().catch(() => {});
       };
 
       const showPrevious = () => {
@@ -817,10 +910,15 @@
       const close = () => {
         lightbox.classList.remove('is-open');
         lightbox.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+
+        lightboxThumb.removeAttribute('src');
+        lightboxThumb.style.opacity = "0";
+
         lightboxImage.removeAttribute('src');
         lightboxImage.removeAttribute('style');
         lightboxImage.classList.remove('is-visible', 'is-zoomed', 'is-dragging');
-        document.body.style.overflow = '';
+
         zoom = 1;
         fitWidth = 0;
         fitHeight = 0;
@@ -834,11 +932,7 @@
         img.addEventListener('click', () => openByIndex(index));
       });
 
-      lightboxImage.addEventListener('load', () => {
-        computeFit();
-        showLightboxImage();
-      });
-
+      // Zoom click: si on zoome, on (re)précharge next en priorité, puis prev
       lightboxImage.addEventListener('click', (event) => {
         event.stopPropagation();
 
@@ -847,6 +941,10 @@
 
         zoom = zoom > 1 ? 1 : 2;
         applyZoom(event.clientX, event.clientY);
+
+        if (zoom > 1) {
+          preloadNextThenPrev().catch(() => {});
+        }
       });
 
       lightboxStage.addEventListener('wheel', (event) => {
@@ -860,8 +958,13 @@
         );
 
         if (nextZoom === zoom) return;
+
         zoom = nextZoom;
         applyZoom(event.clientX, event.clientY);
+
+        if (zoom > 1) {
+          preloadNextThenPrev().catch(() => {});
+        }
       }, { passive: false });
 
       lightboxImage.addEventListener('pointerdown', (event) => {
@@ -954,16 +1057,22 @@
         if (event.key === '+' || event.key === '=') {
           zoom = clamp(zoom + 0.2, MIN_ZOOM, MAX_ZOOM);
           applyZoom();
+          if (zoom > 1) preloadNextThenPrev().catch(() => {});
         }
 
         if (event.key === '-') {
           zoom = clamp(zoom - 0.2, MIN_ZOOM, MAX_ZOOM);
           applyZoom();
+          if (zoom > 1) preloadNextThenPrev().catch(() => {});
         }
       });
 
       window.addEventListener('resize', () => {
-        if (lightbox.classList.contains('is-open') && lightboxImage.getAttribute('src')) computeFit();
+        if (lightbox.classList.contains('is-open') && lightboxImage.getAttribute('src')) {
+          computeFit();
+          // pas de showFullVisible ici: l'image est déjà visible, on garde stable
+          applyZoom();
+        }
       });
     })();
   </script>
