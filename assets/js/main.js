@@ -147,6 +147,7 @@
   let swipeStartY = 0;
   let isSwipeTracking = false;
   let suppressTap = false;
+  let fullImageReady = false;
 
   const fullPreloadPromises = new Map();
 
@@ -183,6 +184,7 @@
   };
 
   const showFullVisible = () => {
+    fullImageReady = true;
     requestAnimationFrame(() => {
       lightboxImage.classList.add('is-visible');
       lightboxThumb.style.opacity = "0";
@@ -193,8 +195,8 @@
     if (!fitWidth || !fitHeight) return;
 
     const stageRect = lightboxStage.getBoundingClientRect();
-    const previousWidth = lightboxImage.offsetWidth || fitWidth;
-    const previousHeight = lightboxImage.offsetHeight || fitHeight;
+    const previousWidth = parseFloat(lightboxImage.style.width) || fitWidth;
+    const previousHeight = parseFloat(lightboxImage.style.height) || fitHeight;
 
     const focusClientX = clientX ?? (stageRect.left + (lightboxStage.clientWidth / 2));
     const focusClientY = clientY ?? (stageRect.top + (lightboxStage.clientHeight / 2));
@@ -267,6 +269,7 @@
     hasDragged = false;
     isSwipeTracking = false;
     suppressTap = false;
+    fullImageReady = false;
 
     lightbox.classList.add('is-open');
     lightbox.setAttribute('aria-hidden', 'false');
@@ -274,15 +277,13 @@
     lightboxStage.scrollLeft = 0;
     lightboxStage.scrollTop = 0;
 
-    // Show thumb as blurred placeholder, but only once it has loaded
     const thumbSrc = images[currentIndex].dataset.src || images[currentIndex].currentSrc || images[currentIndex].src;
-    lightboxThumb.style.opacity = "0";
+    lightboxThumb.removeAttribute('style');
     lightboxThumb.src = thumbSrc;
 
     const showThumb = () => {
+      if (fullImageReady) return;
       lightboxThumb.style.opacity = "1";
-      lightboxThumb.style.filter = "blur(10px)";
-      lightboxThumb.style.transform = "scale(1.01)";
     };
 
     if (lightboxThumb.complete && lightboxThumb.naturalWidth > 1) {
@@ -291,30 +292,27 @@
       lightboxThumb.addEventListener('load', showThumb, { once: true });
     }
 
-    // Hide full image until ready
     lightboxImage.removeAttribute('src');
     lightboxImage.removeAttribute('style');
     lightboxImage.classList.remove('is-visible', 'is-zoomed', 'is-dragging');
-    lightboxImage.style.opacity = "0";
-    lightboxImage.style.transform = "scale(.985)";
 
     const fullSrc = images[currentIndex].dataset.full || images[currentIndex].src;
 
     await preloadFull(currentIndex);
 
-    lightboxImage.classList.remove('is-visible');
+    if (currentIndex !== index) return;
+
     lightboxImage.src = fullSrc;
 
-    if (lightboxImage.complete && lightboxImage.naturalWidth) {
+    const reveal = () => {
       computeFit();
       showFullVisible();
+    };
+
+    if (lightboxImage.complete && lightboxImage.naturalWidth) {
+      reveal();
     } else {
-      const onLoad = () => {
-        computeFit();
-        showFullVisible();
-      };
-      lightboxImage.addEventListener('load', onLoad, { once: true });
-      lightboxImage.addEventListener('error', () => {}, { once: true });
+      lightboxImage.addEventListener('load', reveal, { once: true });
     }
 
     preloadNextThenPrev().catch(() => {});
@@ -336,7 +334,7 @@
     document.body.style.overflow = '';
 
     lightboxThumb.removeAttribute('src');
-    lightboxThumb.style.opacity = "0";
+    lightboxThumb.removeAttribute('style');
 
     lightboxImage.removeAttribute('src');
     lightboxImage.removeAttribute('style');
@@ -349,6 +347,7 @@
     hasDragged = false;
     isSwipeTracking = false;
     suppressTap = false;
+    fullImageReady = false;
   };
 
   images.forEach((img, index) => {
