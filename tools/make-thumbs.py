@@ -1,4 +1,5 @@
 import sys
+import json
 import subprocess
 from pathlib import Path
 
@@ -37,6 +38,9 @@ ROOT_DIR = TOOLS_DIR.parent
 
 PHOTOS_DIR = (ROOT_DIR / "photos").resolve()
 THUMBS_DIR = (ROOT_DIR / "thumbs").resolve()
+DATA_DIR = (ROOT_DIR / "_data").resolve()
+THUMBS_JSON = (DATA_DIR / "thumbs.json").resolve()
+
 GIT_PUSH_BAT = (TOOLS_DIR / "git-push.bat").resolve()
 
 THUMB_WIDTH = 600
@@ -44,6 +48,7 @@ THUMB_QUALITY = 70
 THUMB_COMPRESSION_LEVEL = 6
 
 THUMBS_DIR.mkdir(parents=True, exist_ok=True)
+DATA_DIR.mkdir(parents=True, exist_ok=True)
 
 # ==========================================================
 # OUTILS
@@ -52,6 +57,18 @@ def ffmpeg_exists() -> bool:
     try:
         result = subprocess.run(
             ["ffmpeg", "-version"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        return result.returncode == 0
+    except FileNotFoundError:
+        return False
+
+
+def ffprobe_exists() -> bool:
+    try:
+        result = subprocess.run(
+            ["ffprobe", "-version"],
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL
         )
@@ -109,6 +126,59 @@ def make_thumb(source_path: Path, target_path: Path):
     return True, ""
 
 
+def ffprobe_dimensions(image_path: Path):
+    """
+    Retourne (w, h) via ffprobe ou (None, None) si impossible.
+    """
+    try:
+        cmd = [
+            "ffprobe",
+            "-v", "error",
+            "-select_streams", "v:0",
+            "-show_entries", "stream=width,height",
+            "-of", "csv=p=0:s=x",
+            str(image_path),
+        ]
+        result = subprocess.run(cmd, capture_output=True, text=True)
+        if result.returncode != 0:
+            return None, None
+
+        out = (result.stdout or "").strip()
+        if "x" not in out:
+            return None, None
+
+        w_str, h_str = out.split("x", 1)
+        w = int(w_str.strip())
+        h = int(h_str.strip())
+        if w <= 0 or h <= 0:
+            return None, None
+        return w, h
+    except Exception:
+        return None, None
+
+
+def write_thumbs_json(thumb_files):
+    """
+    Ecrit /_data/thumbs.json avec les dimensions de chaque thumb.
+    Clé = file.path Jekyll (ex: "/thumbs/abc.webp")
+    Valeur = {"w": 600, "h": 842}
+    """
+    data = {}
+    for thumb in thumb_files:
+        rel = thumb.relative_to(ROOT_DIR).as_posix()  # "thumbs/abc.webp"
+        key = "/" + rel                              # "/thumbs/abc.webp"
+        w, h = ffprobe_dimensions(thumb)
+        if w is None or h is None:
+            continue
+        data[key] = {"w": w, "h": h}
+
+    # JSON stable (diffs propres git)
+    with THUMBS_JSON.open("w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2, sort_keys=True)
+        f.write("\n")
+
+    return len(data)
+
 # ==========================================================
 # MAIN
 # ==========================================================
@@ -117,10 +187,16 @@ def main():
     console.print("[bold cyan]Génération des miniatures[/bold cyan]")
     console.print(f"[dim]Source : {PHOTOS_DIR}[/dim]")
     console.print(f"[dim]Sortie : {THUMBS_DIR}[/dim]")
+    console.print(f"[dim]Data   : {THUMBS_JSON}[/dim]")
     console.print()
 
     if not ffmpeg_exists():
         console.print("[bold red]Erreur : FFmpeg n'est pas installé ou non accessible dans le PATH.[/bold red]")
+        sys.exit(1)
+
+    if not ffprobe_exists():
+        console.print("[bold red]Erreur : FFprobe n'est pas installé ou non accessible dans le PATH.[/bold red]")
+        console.print("[dim]FFprobe est fourni avec FFmpeg (normalement dans le même dossier).[/dim]")
         sys.exit(1)
 
     if not PHOTOS_DIR.exists():
@@ -185,6 +261,13 @@ def main():
         console.print(f"[bold]Miniatures créées :[/bold] [green]{created}[/green]")
         console.print(f"[bold]Erreurs :[/bold] [red]{errors}[/red]")
         console.print()
+
+    # Toujours (re)générer thumbs.json pour inclure nouvelles + existantes
+    thumb_files = find_webp_files(THUMBS_DIR)
+    written = write_thumbs_json(thumb_files)
+    console.print(f"[cyan]/_data/thumbs.json généré.[/cyan] Entrées: [bold]{written}[/bold]")
+    console.print("[dim]Important : commit/push aussi le dossier /_data pour que Jekyll le voie.[/dim]")
+    console.print()
 
     if GIT_PUSH_BAT.exists():
         launch_git = Confirm.ask("Lancer maintenant git-push.bat ?", default=False)

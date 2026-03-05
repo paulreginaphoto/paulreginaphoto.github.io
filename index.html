@@ -523,6 +523,7 @@
             {% assign ext = file.extname | downcase %}
             {% if ext == '.webp' %}
               {% assign full_path = file.path | replace: '/thumbs/', '/photos/' %}
+              {% assign meta = site.data.thumbs[file.path] %}
               <figure class="card">
                 <img
                   class="gallery-image"
@@ -531,6 +532,7 @@
                   alt=""
                   loading="lazy"
                   decoding="async"
+                  {% if meta and meta.w and meta.h %}width="{{ meta.w }}" height="{{ meta.h }}"{% endif %}
                   {% if forloop.index <= 6 %}fetchpriority="high"{% endif %}
                 >
               </figure>
@@ -662,7 +664,6 @@
           .filter((index) => index >= 0 && index < images.length)
           .forEach((index) => {
             const preload = new Image();
-            // Précharge la HD (photos) si dispo
             preload.src = images[index].dataset.full || images[index].currentSrc || images[index].src;
           });
       };
@@ -762,8 +763,6 @@
       const openByIndex = (index) => {
         if (index < 0 || index >= images.length) return;
         currentIndex = index;
-
-        // IMPORTANT : on ouvre la HD (photos) si dispo
         const src = images[currentIndex].dataset.full || images[currentIndex].currentSrc || images[currentIndex].src;
         open(src);
       };
