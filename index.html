@@ -519,13 +519,15 @@
       <div class="gallery">
         {% assign sorted_files = site.static_files | sort: "name" %}
         {% for file in sorted_files %}
-          {% if file.path contains '/photos/' %}
+          {% if file.path contains '/thumbs/' %}
             {% assign ext = file.extname | downcase %}
-            {% if ext == '.jpg' or ext == '.jpeg' or ext == '.png' or ext == '.webp' or ext == '.avif' or ext == '.gif' %}
+            {% if ext == '.webp' %}
+              {% assign full_path = file.path | replace: '/thumbs/', '/photos/' %}
               <figure class="card">
                 <img
                   class="gallery-image"
                   src="{{ file.path | relative_url }}"
+                  data-full="{{ full_path | relative_url }}"
                   alt=""
                   loading="lazy"
                   decoding="async"
@@ -660,7 +662,8 @@
           .filter((index) => index >= 0 && index < images.length)
           .forEach((index) => {
             const preload = new Image();
-            preload.src = images[index].currentSrc || images[index].src;
+            // Précharge la HD (photos) si dispo
+            preload.src = images[index].dataset.full || images[index].currentSrc || images[index].src;
           });
       };
 
@@ -759,7 +762,10 @@
       const openByIndex = (index) => {
         if (index < 0 || index >= images.length) return;
         currentIndex = index;
-        open(images[currentIndex].currentSrc || images[currentIndex].src);
+
+        // IMPORTANT : on ouvre la HD (photos) si dispo
+        const src = images[currentIndex].dataset.full || images[currentIndex].currentSrc || images[currentIndex].src;
+        open(src);
       };
 
       const showPrevious = () => {
