@@ -27,7 +27,7 @@ TEMP_DIR = TOOLS_DIR / "_temp_border"
 EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 
 # Bordure type screenshot Instagram
-BORDER_RATIO = 0.0085      # ~0.85% de la plus petite dimension
+BORDER_RATIO = 0.01      # ~0.85% de la plus petite dimension
 BORDER_MIN_PX = 8
 BORDER_MAX_PX = 24
 BORDER_COLOR = "white"
